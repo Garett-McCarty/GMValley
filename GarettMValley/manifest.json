@@ -1,0 +1,10 @@
+{
+    "Name": "GarettM Valley",
+    "Author": "Garett McCarty <GarettMcCarty@gmail.com>",
+    "Version": "0.1.0",
+    "Description": "Personalizations to Stardew Valley",
+    "UniqueID": "garettm.garettmvalley",
+    "EntryDll": "GarettMValley.dll",
+    "MinimumApiVersion": "4.0.0",
+    "UpdateKeys": []
+}
