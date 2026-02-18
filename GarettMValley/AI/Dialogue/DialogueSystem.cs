@@ -124,7 +124,12 @@ public sealed class DialogueSystem : IDisposable
 
         string systemPrompt = _ai.GetSystemPromptForNPC(npc);
         string userPrompt = _ai.GetUserPromptFor(npc, who, location);
-        _dialogueService.StartNpcDialogue(npc, systemPrompt, userPrompt);
+        _dialogueService.StartNpcDialogue(
+            npc,
+            getSystemPrompt: () => _ai.GetSystemPromptForNPC(npc),
+            getUserPrompt: (playerText) => _ai.GetUserPromptFor(npc, who, location, playerText),
+            getNpcName: () => npc.Name
+        );
         return true;
     }
 

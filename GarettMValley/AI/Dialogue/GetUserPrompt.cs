@@ -7,7 +7,7 @@ namespace GarettMValley.AI;
 
 public sealed partial class AiManager
 {
-    public string GetUserPromptFor(NPC npc, Farmer who, GameLocation location)
+    public string GetUserPromptFor(NPC npc, Farmer who, GameLocation location, string playerSaid = "")
     {
         Blackboard? blackboard = null;
         string? action = null;
@@ -34,10 +34,14 @@ public sealed partial class AiManager
         stringBuilder.AppendLine("PLAYER_ACTION:");
         stringBuilder.AppendLine("- The player initiated conversation with the NPC.");
         stringBuilder.AppendLine();
+        stringBuilder.AppendLine("PLAYER_SAYS:");
+        stringBuilder.AppendLine(playerSaid);
         stringBuilder.AppendLine("TASK:");
         stringBuilder.AppendLine("- Produce a natural NPC line + 3 distinct player reply options.");
         stringBuilder.AppendLine("- Keep it consistent with the NPC personality and current emotion.");
         stringBuilder.AppendLine("- Keep it compatible with vanilla Stardew tone.");
+        stringBuilder.AppendLine("- Return only minified JSON with schema:");
+        stringBuilder.AppendLine("{\"npc_line\":\"string\",\"player_options\":[\"string\",\"string\",\"string\"],\"intent\":\"string\",\"tags\":[\"string\",\"string\"]}");
 
         return stringBuilder.ToString();
     }

@@ -16,18 +16,31 @@ namespace GarettMValley.AI;
 /// </summary>
 internal sealed class OllamaClient : IDisposable
 {
+    /// <summary>
+    /// Underlying HTTP client handling our API calls
+    /// </summary>
     private readonly HttpClient _http;
+
+    /// <summary>
+    /// Ollama API URI
+    /// </summary>
     private readonly Uri _baseUri;
 
-    // Safe defaults for SMAPI mods:
-    // - Avoid infinite hangs
-    // - Keep JSON small and predictable
-    private static readonly JsonSerializerOptions JsonOpts = new()
+    /// <summary>
+    /// JSON serialization options
+    /// </summary>
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
+    /// <summary>
+    /// Construct a new Ollama Client API Wrapper
+    /// </summary>
+    /// <param name="baseUrl">URI of the Ollama API</param>
+    /// <param name="timeout">Default timeout for API calls</param>
+    /// <param name="handler">Default message handler</param>
     public OllamaClient(
         string baseUrl = "http://localhost:11434",
         TimeSpan? timeout = null,
@@ -42,6 +55,9 @@ internal sealed class OllamaClient : IDisposable
         _http.DefaultRequestHeaders.ConnectionClose = false;
     }
 
+    /// <summary>
+    /// Dispose/Free this wrapper instance
+    /// </summary>
     public void Dispose() => _http.Dispose();
 
     /// <summary>
@@ -72,7 +88,7 @@ internal sealed class OllamaClient : IDisposable
 
         using var msg = new HttpRequestMessage(HttpMethod.Post, "api/generate")
         {
-            Content = new StringContent(JsonSerializer.Serialize(req, JsonOpts), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(req, JsonOptions), Encoding.UTF8, "application/json")
         };
 
         using var resp = await _http.SendAsync(msg, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
@@ -87,7 +103,7 @@ internal sealed class OllamaClient : IDisposable
             throw new OllamaHttpException((int)resp.StatusCode, resp.ReasonPhrase ?? "HTTP error", details);
         }
 
-        var parsed = JsonSerializer.Deserialize<OllamaGenerateResponse>(body, JsonOpts)
+        var parsed = JsonSerializer.Deserialize<OllamaGenerateResponse>(body, JsonOptions)
                         ?? throw new InvalidOperationException("Ollama returned empty JSON.");
 
         return new OllamaGenerateResult(
@@ -118,6 +134,11 @@ internal sealed class OllamaClient : IDisposable
         }
     }
 
+    /// <summary>
+    /// Try getting the parsing the response error
+    /// </summary>
+    /// <param name="json"></param>
+    /// <returns></returns>
     private static string? TryParseError(string json)
     {
         try
