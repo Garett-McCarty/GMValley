@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GarettMValley;
+namespace GarettMValley.AI;
 
 /// <summary>
 /// Minimal, SMAPI-safe Ollama client for net6.0.

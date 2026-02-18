@@ -12,10 +12,24 @@ namespace GarettMValley.AI;
 /// </summary>
 public sealed class DialogueSystem : IDisposable
 {
+    /// <summary>
+    /// Reference to our monitoring service provided by SMAPI
+    /// </summary>
     private readonly IMonitor _monitor;
+
+    /// <summary>
+    /// Reference to our Dialogue Service to generate dialogue
+    /// </summary>
     private DialogueService? _dialogueService;
+
+    /// <summary>
+    /// Reference to our AI Manager
+    /// </summary>
     private AiManager? _ai;
 
+    /// <summary>
+    /// Flag to determine if we enable the dialogue system
+    /// </summary>
     public bool Enabled { get; set; } = true;
 
     public DialogueSystem(IMonitor monitor)
@@ -26,7 +40,7 @@ public sealed class DialogueSystem : IDisposable
     public void Hook(IModHelper helper, AiManager aiManager, string harmonyId)
     {
         _ai = aiManager;
-        if (_ai.GetConfig().EnableOllama)
+        if (_ai.GetConfig().AllowDialogue)
         {
             Enabled = true;
         } else

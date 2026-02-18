@@ -1,8 +1,21 @@
 
 namespace GarettMValley;
 
+/// <summary>
+/// Configuration for GarettMValley
+/// </summary>
 public sealed class ModConfig
 {
+    /// <summary>
+    /// Allow custom dialogue
+    /// </summary>
+    public bool AllowDialogue { get; set; } = true;
+
+    /// <summary>
+    /// Allow NPCs to generate their own dialogue
+    /// </summary>
+    public bool AllowGeneratedDialogue { get; set; } = true;
+
     /// <summary>
     /// Allow Villager NPC Agency
     /// </summary>
