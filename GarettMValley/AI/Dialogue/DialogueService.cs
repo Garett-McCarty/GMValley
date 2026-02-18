@@ -10,6 +10,7 @@ namespace GarettMValley.AI;
 
 internal sealed class DialogueService
 {
+    private readonly DialogueSystem _dialogue;
     /// <summary>
     /// Reference to the monitoring system
     /// </summary>
@@ -31,8 +32,9 @@ internal sealed class DialogueService
     /// </summary>
     private readonly string _model;
 
-    public DialogueService(IMonitor monitor, MainThreadDispatcher dispatcher, string ollamaUri, string ollamaModel, int timeoutSeconds)
+    public DialogueService(IMonitor monitor, MainThreadDispatcher dispatcher, string ollamaUri, string ollamaModel, int timeoutSeconds, DialogueSystem dialogue)
     {
+        _dialogue = dialogue;
         _monitor = monitor;
         _dispatcher = dispatcher;
         _queue = new SingleFlightQueue(monitor);
@@ -51,41 +53,22 @@ internal sealed class DialogueService
         _queue.CancelCurrent();
     }
 
-    public void StartNpcDialogue(NPC npc, string playerIntent, string gameContext)
+    public void StartNpcDialogue(NPC npc, string systemPrompt, string userPrompt)
     {
-        string npcName = npc?.Name ?? "Unknown";
-        string playerName = Game1.player?.Name ?? "Player";
-
         _queue.ReplaceCurrent(async token =>
         {
-            var system = @"You are a Stardew Valley villager. Stay in character.
-Be brief (max 2 sentences), PG. No meta, no quotes, no stage directions.";
-
-            var prompt =
-$@"NPC: {npcName}
-Player: {playerName}
-
-CURRENT CONTEXT:
-{gameContext}
-
-PLAYER INPUT:
-{playerIntent}
-
-TASK:
-Write ONE in-character Stardew dialogue line (1–2 sentences).";
-
             var options = new Dictionary<string, object>
             {
                 ["temperature"] = 0.8,
                 ["top_p"] = 0.9,
-                ["num_predict"] = 90
+                ["num_predict"] = 120
             };
 
             // Off-thread network call
             var result = await _ollama.GenerateAsync(
                 model: _model,
-                prompt: prompt,
-                system: system,
+                prompt: userPrompt,
+                system: systemPrompt,
                 options: options,
                 cancellationToken: token
             ).ConfigureAwait(false);
@@ -95,18 +78,13 @@ Write ONE in-character Stardew dialogue line (1–2 sentences).";
             // Marshal back to the main thread to touch Stardew UI/state
             _dispatcher.Enqueue(() =>
             {
-                // Re-check context: player might have closed menus, etc.
-                if (Game1.currentLocation is null || Game1.player is null)
-                    return;
-
-                if (string.IsNullOrWhiteSpace(line))
-                    line = "…";
-
-                // Show dialogue safely on main thread
-                Game1.drawDialogueNoTyping(line);
-
-                // Alternatively:
-                // Game1.activeClickableMenu = new DialogueBox(line);
+                if (Game1.activeClickableMenu is DialogueBox)
+                {
+                    Game1.activeClickableMenu = new DialogueBox(line);
+                } else
+                {
+                    DialogueSystem.ShowDialogue(npc, line);
+                }
             });
         });
     }

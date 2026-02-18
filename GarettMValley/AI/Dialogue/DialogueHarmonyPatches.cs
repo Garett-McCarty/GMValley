@@ -23,34 +23,17 @@ internal static class DialogueHarmonyPatches
     /// </summary>
     private static bool NPC_checkAction_Prefix(NPC __instance, Farmer who, GameLocation l, ref bool __result)
     {
-        // If our system isn't available, do nothing.
+        // If our system isn't available, let vanilla handle it
         var system = DialogueSystemBridge.System;
         if (system is null)
             return true;
 
-        // Ask the system if it wants to handle this action.
-        // Note: We call the async method but block on it since Harmony prefixes must be synchronous
         try
         {
-            var task = system.TryHandleNpcAction(__instance, who, l);
-            if (task.IsCompleted)
+            if (system.TryHandleNpcAction(__instance, who, l))
             {
-                if (task.Result)
-                {
-                    __result = true;
-                    return false;
-                }
-            }
-            else
-            {
-                // If not completed, queue it to run later without blocking
-                task.ContinueWith(t =>
-                {
-                    if (t.Result)
-                    {
-                        // We can't modify __result here, so dialogue was already shown in the async method
-                    }
-                });
+                __result = true;
+                return false;
             }
         }
         catch

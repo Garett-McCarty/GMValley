@@ -8,7 +8,7 @@ using GarettMValley.AI;
 namespace GarettMValley.AI.Actions;
 
 /// <summary>
-/// Agent emote action
+/// Emote Action for Agents
 /// </summary>
 public sealed class EmoteAction : IAction
 {

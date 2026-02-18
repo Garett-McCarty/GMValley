@@ -49,7 +49,7 @@ public sealed class DialogueSystem : IDisposable
         }
 
         var dispatcher = new MainThreadDispatcher(helper, _monitor);
-        _dialogueService = new DialogueService(monitor: _monitor, dispatcher: dispatcher, ollamaUri: _ai.GetConfig().OllamaUrl, ollamaModel: _ai.GetConfig().OllamaModel, _ai.GetConfig().OllamaTimeout);
+        _dialogueService = new DialogueService(monitor: _monitor, dispatcher: dispatcher, ollamaUri: _ai.GetConfig().OllamaUrl, ollamaModel: _ai.GetConfig().OllamaModel, _ai.GetConfig().OllamaTimeout, this);
         
         // Optional: quick toggle keys
         helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -97,7 +97,7 @@ public sealed class DialogueSystem : IDisposable
     /// <summary>
     /// Entry point called from Harmony patch. Returns true if we handled the interaction (skip vanilla).
     /// </summary>
-    internal async Task<bool> TryHandleNpcAction(NPC npc, Farmer who, GameLocation location)
+    internal bool TryHandleNpcAction(NPC npc, Farmer who, GameLocation location)
     {
         if (!Enabled || _ai is null || _dialogueService is null)
         {
@@ -105,7 +105,7 @@ public sealed class DialogueSystem : IDisposable
         }
 
         // Hard safety guards: don't break scripted content.
-        if (Game1.eventUp || Game1.activeClickableMenu is not null)
+        if (Game1.eventUp)
             return false;
 
         // Validate that farmer is present
@@ -113,7 +113,6 @@ public sealed class DialogueSystem : IDisposable
             return false;
 
         // If player is holding an object, vanilla often uses that for gifts/etc.
-        // You can refine later (e.g. allow tools but not objects).
         if (who.ActiveObject is not null)
             return false;
 
@@ -121,16 +120,15 @@ public sealed class DialogueSystem : IDisposable
         if (!_ai.TryDecideTakeover(npc, who, location, out var takeover) || !takeover.ShouldTakeOver)
             return false;
 
-        string context = 
-            $"Season: {Game1.currentSeason}. " +
-            $"Time: {Game1.timeOfDay}. " +
-            $"Location: {location?.Name}. " +
-            $"Weather: {Game1.isRaining}.";
-        _dialogueService.StartNpcDialogue(npc, playerIntent: "Talk normally.", gameContext: context);
+        ShowDialogue(npc, "thinking...");
+
+        string systemPrompt = _ai.GetSystemPromptForNPC(npc);
+        string userPrompt = _ai.GetUserPromptFor(npc, who, location);
+        _dialogueService.StartNpcDialogue(npc, systemPrompt, userPrompt);
         return true;
     }
 
-    private static void ShowDialogue(NPC npc, string text)
+    public static void ShowDialogue(NPC npc, string text)
     {
         var dialogue = new Stack<Dialogue>();
         dialogue.Push(new Dialogue(npc, "", text));
