@@ -67,6 +67,26 @@ public sealed class ModConfig
     public int OllamaTimeout { get; set; } = 15;
 
     /// <summary>
+    /// Enable a small localhost HTTP server for debugging agent state.
+    /// </summary>
+    public bool EnableHttpApi { get; set; } = true;
+
+    /// <summary>
+    /// Address to bind the debug server to
+    /// </summary>
+    public string HttpApiBindAddress { get; set; } = "127.0.0.1";
+
+    /// <summary>
+    /// Port to bind the debug server to.
+    /// </summary>
+    public int HttpApiPort { get; set; } = 18080;
+
+    /// <summary>
+    /// Optional API key. If set (non-empty), requests must include header 'X-Api-Key'
+    /// </summary>
+    public string HttpApiKey { get; set; } = "";
+
+    /// <summary>
     /// Enable the Mod
     /// </summary>
     public bool EnableMod { get; set; } = true;

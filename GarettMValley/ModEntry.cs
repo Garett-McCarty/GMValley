@@ -7,6 +7,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using GarettMValley.AI;
+using GarettMValley.DebugApi;
 
 namespace GarettMValley;
 
@@ -24,6 +25,8 @@ public sealed class ModEntry : Mod
     /// Instance to our AI Manager
     /// </summary>
     private AiManager AiManager = null!;
+
+    private AgentApiServer ApiServer = null!;
 
     private DialogueSystem DialogueManager = null!;
 
@@ -44,6 +47,13 @@ public sealed class ModEntry : Mod
             
             DialogueManager = new DialogueSystem(Monitor);
             DialogueManager.Hook(helper, AiManager, this.ModManifest.UniqueID);
+
+            ApiServer = new AgentApiServer(Monitor, AiManager, Config);
+            ApiServer.Start();
+
+            helper.Events.GameLoop.ReturnedToTitle += (_, _) => ApiServer?.Stop();
+            helper.Events.GameLoop.GameLaunched += (_, _) => ApiServer?.Start();
+            helper.Events.GameLoop.SaveLoaded += (_, _) => ApiServer?.Start();
             
             Monitor.Log("GarettMValley loaded successfully with AI dialogue support!", LogLevel.Info);
         }
