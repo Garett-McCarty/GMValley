@@ -2,7 +2,7 @@ using System;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 internal static class DialogueUI
 {

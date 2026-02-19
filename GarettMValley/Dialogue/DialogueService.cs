@@ -6,8 +6,10 @@ using StardewValley;
 using StardewValley.Menus;
 using StardewModdingAPI;
 using System.Text;
+using GarettMValley.Network;
+using GarettMValley.Scheduler;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 internal sealed class DialogueService
 {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 internal sealed class DialogueHistory
 {

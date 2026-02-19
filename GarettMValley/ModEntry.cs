@@ -7,7 +7,8 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using GarettMValley.AI;
-using GarettMValley.DebugApi;
+using GarettMValley.Dialogue;
+using GarettMValley.Network;
 
 namespace GarettMValley;
 

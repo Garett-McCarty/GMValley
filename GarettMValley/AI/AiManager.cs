@@ -5,6 +5,8 @@ using StardewValley;
 using StardewValley.Monsters;
 using GarettMValley.AI.Adapters;
 using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Personality;
+using GarettMValley.Dialogue;
 using StardewValley.Characters;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
@@ -50,6 +52,10 @@ public sealed partial class AiManager
     /// Active agents around the player
     /// </summary>
     private const float ActiveRadiusTiles = 20f;
+
+    /// <summary>
+    /// Active squared radius around the player
+    /// </summary>
     private const float ActiveRadiusTilesSq = ActiveRadiusTiles * ActiveRadiusTiles;
 
     /// <summary>
@@ -72,7 +78,10 @@ public sealed partial class AiManager
     /// </summary>
     private PersonalityLibrary _personalities = null!;
 
-    private PersonalityAutogen _personalityAutogen = null!;
+    /// <summary>
+    /// Personality Autogen Helper
+    /// </summary>
+    private PersonalityFileGen _personalityAutogen = null!;
 
 
     /// <summary>
@@ -91,7 +100,7 @@ public sealed partial class AiManager
     /// <param name="helper"></param>
     public void Hook(IModHelper helper)
     {
-        _personalityAutogen = new PersonalityAutogen(helper, _log);
+        _personalityAutogen = new PersonalityFileGen(helper, _log);
         _personalities = new PersonalityLibrary(helper);
 
         helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -391,38 +400,52 @@ public sealed partial class AiManager
         return true;
     }
 
+    /// <summary>
+    /// Get our mod configuration
+    /// </summary>
+    /// <returns></returns>
     public ModConfig GetConfig() => _config;
 
+    /// <summary>
+    /// Agent Runtime
+    /// </summary>
     private sealed class AgentRuntime
     {
         /// <summary>
         /// The active agent adapter
         /// </summary>
         private IAgentAdapter _adapter;
+
         /// <summary>
         /// Agents blackboard
         /// </summary>
         private readonly Blackboard _blackboard = new();
+
         /// <summary>
         /// List of sensor inputs
         /// </summary>
         private readonly List<ISensor> _sensors;
+
         /// <summary>
         /// BrainUtility for the agent
         /// </summary>
         private readonly BrainUtility _brain;
+
         /// <summary>
         /// Personality references for agents
         /// </summary>
         private readonly PersonalityLibrary _personalities;
+
         /// <summary>
         /// Logging instance
         /// </summary>
         private readonly IMonitor _log;
+
         /// <summary>
         /// Current action being performed by the agent
         /// </summary>
         private IAction? _current;
+
         /// <summary>
         /// Last action executed by the agent
         /// </summary>
@@ -433,25 +456,12 @@ public sealed partial class AiManager
         /// </summary>
         /// <param name="adapter">Adapter responsible for the agent. MonsterAdapter, PetAdapter, VillagerAdapter, etc</param>
         public void SetAdapter(IAgentAdapter adapter) => _adapter = adapter;
+
+        /// <summary>
+        /// Get the adapter, used for debugging.
+        /// </summary>
+        /// <returns></returns>
         public IAgentAdapter GetAdapterForDebug() => _adapter;
-        public string BuildDialogueLine(bool debug = false)
-        {
-            // TODO: Replace with Ollama later.
-            var emotion = _blackboard.Emotion;
-
-            string mood =
-                emotion.Stress > 0.65f ? "…I’m a little on edge today." :
-                emotion.Valence > 0.35f ? "Nice to see you!" :
-                emotion.Valence < -0.35f ? "Oh. Hey." :
-                "Hi.";
-
-            if (!debug)
-                return $"{mood}";
-            // Optionally add debug as a second page using #$e#
-            // (Stardew uses #$e# as a dialogue page break in many assets.)
-            string message = GetDebugLine();
-            return $"{mood}#$e#{message}";
-        }
 
         /// <summary>
         /// Agent constructor
@@ -548,6 +558,10 @@ public sealed partial class AiManager
             return adapter.Id.Value;
         }
 
+        /// <summary>
+        /// Determine if a player is nearby
+        /// </summary>
+        /// <returns></returns>
         public bool DebugPlayerIsNear() => _blackboard.PlayerIsNear;
 
         public string BuildDialogueLine(NPC npc, Farmer who, GameLocation location)

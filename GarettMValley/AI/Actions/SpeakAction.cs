@@ -23,7 +23,7 @@ public sealed class SpeakAction : IAction
     public void Start(Blackboard _blackboard) { IsFinished = false; }
     public void Tick(Blackboard blackboard)
     { 
-        blackboard.Self.Say("Oh! Didn't see you there.");
+        blackboard.Self!.Say("This is speech from SpeakAction!");
         blackboard.SetCooldown("speak", 600);
         IsFinished = true;
     }

@@ -1,7 +1,7 @@
 using HarmonyLib;
 using StardewValley;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 /// <summary>
 /// Harmony patches that intercept talk interactions.

@@ -5,7 +5,10 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace GarettMValley.AI;
+using GarettMValley.AI;
+using GarettMValley.Scheduler;
+
+namespace GarettMValley.Dialogue;
 
 /// <summary>
 /// Central dialogue takeover system. Installs Harmony patches and routes talk interactions to agent brains.
@@ -135,8 +138,8 @@ public sealed class DialogueSystem : IDisposable
 
     public static void ShowDialogue(NPC npc, string text)
     {
-        var dialogue = new Stack<Dialogue>();
-        dialogue.Push(new Dialogue(npc, "", text));
+        var dialogue = new Stack<StardewValley.Dialogue>();
+        dialogue.Push(new StardewValley.Dialogue(npc, "", text));
         npc.TemporaryDialogue = dialogue;
         Game1.drawDialogue(npc);
     }

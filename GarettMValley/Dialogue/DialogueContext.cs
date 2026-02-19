@@ -1,5 +1,5 @@
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 /// <summary>
 /// DialogueContext for constructing facts without prompts becoming spaghetti.

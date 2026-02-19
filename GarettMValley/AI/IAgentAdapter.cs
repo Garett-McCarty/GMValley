@@ -11,26 +11,33 @@ namespace GarettMValley.AI;
 public interface IAgentAdapter
 {
     /// <summary>
-    /// Agent Identifier
+    /// Unique identifier for the agent
     /// </summary>
     AgentId Id { get; }
 
     /// <summary>
-    /// Agent kind name
+    /// Agent kind identifier
     /// </summary>
     string Kind { get; }
 
     /// <summary>
-    /// Agents GameLocation
+    /// Agents map location
     /// </summary>
     GameLocation? Location { get; }
 
     /// <summary>
-    /// Agents Position Tile
+    /// Agents position tile
     /// </summary>
     Vector2 Tile { get; }
 
+    /// <summary>
+    /// Agents physical character
+    /// </summary>
     Character Character { get; }
+
+    /// <summary>
+    /// Get the raw reference to our adapter
+    /// </summary>
     object Raw { get; }
 
     /// <summary>

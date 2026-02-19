@@ -1,6 +1,6 @@
 using StardewValley.Monsters;
 using Microsoft.Xna.Framework;
-using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Emotion;
 
 namespace GarettMValley.AI.Sensors;
 
@@ -15,11 +15,11 @@ public sealed class NearbyThreatSensor : ISensor
         Monster? nearest = null;
         float bestDistSq = float.MaxValue;
 
-        foreach(var character in blackboard.Location.characters)
+        foreach(var character in blackboard.Location!.characters)
         {
             if (character is not Monster monster)
                 continue;
-            float distanceSq = Vector2.DistanceSquared(monster.Tile, blackboard.Self.Tile);
+            float distanceSq = Vector2.DistanceSquared(monster.Tile, blackboard.Self!.Tile);
             if (distanceSq <= ThreatRadiusTilesSq && distanceSq < bestDistSq)
             {
                 bestDistSq = distanceSq;

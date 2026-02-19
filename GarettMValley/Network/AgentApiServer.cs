@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using GarettMValley.AI;
 using StardewModdingAPI;
 
-namespace GarettMValley.DebugApi;
+namespace GarettMValley.Network;
 
 /// <summary>
 /// Very small localhost HTTP server used for debugging agent internals.

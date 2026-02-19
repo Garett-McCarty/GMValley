@@ -1,7 +1,8 @@
 
 using Microsoft.Xna.Framework;
+using GarettMValley.AI.Mind.Emotion;
 
-namespace GarettMValley.AI.Mind;
+namespace GarettMValley.AI.Mind.Personality;
 
 /// <summary>
 /// Personality profile for AI Agents

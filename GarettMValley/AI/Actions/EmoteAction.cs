@@ -20,7 +20,7 @@ public sealed class EmoteAction : IAction
     public void Start(Blackboard _blackboard) { IsFinished = false; }
     public void Tick(Blackboard blackboard)
     { 
-        blackboard.Self.Emote(emoteId);
+        blackboard.Self!.Emote(emoteId);
         blackboard.SetCooldown("emote", 120); // ~2 seconds if tick interval is fast,
         IsFinished = true;
     }

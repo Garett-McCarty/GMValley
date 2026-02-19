@@ -15,7 +15,7 @@ public sealed class FaceTargetAction : IAction
     public bool CanContinue(Blackboard blackboard) => true;
     public void Start(Blackboard blackboard) { IsFinished = false; }
     public void Tick(Blackboard blackboard) { 
-        blackboard.Self.FaceTile(blackboard.Player.Tile);
+        blackboard.Self!.FaceTile(blackboard.Player!.Tile);
         blackboard.SetCooldown("face_player", 20);
         IsFinished = true; 
     }

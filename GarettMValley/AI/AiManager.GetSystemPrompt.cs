@@ -1,5 +1,6 @@
 using System.Text;
-using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Emotion;
+using GarettMValley.AI.Mind.Personality;
 using StardewModdingAPI;
 using StardewValley;
 

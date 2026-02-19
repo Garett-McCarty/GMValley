@@ -4,7 +4,7 @@ using System.IO;
 using StardewModdingAPI;
 using StardewValley.GameData.FishPonds;
 
-namespace GarettMValley.AI.Mind;
+namespace GarettMValley.AI.Mind.Personality;
 
 public sealed class PersonalityLibrary
 {

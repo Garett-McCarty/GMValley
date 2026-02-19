@@ -32,16 +32,16 @@ public sealed class MoveToTileAction : IAction
         IsFinished = false;
         stuckTicks = 0;
         targetTile = blackboard.MoveTargetTile!.Value;
-        lastTile = blackboard.Self.Tile;
+        lastTile = blackboard.Self!.Tile;
         var character = blackboard.Self.Character;
         var location = blackboard.Location;
         previousController = character.controller;
-        character.controller = (StardewValley.Pathfinding.PathFindController)PathControllerFactory.CreatePathFindController(character, location, targetTile, finalFacingDirection: -1);
+        character.controller = (StardewValley.Pathfinding.PathFindController)PathControllerFactory.CreatePathFindController(character, location!, targetTile, finalFacingDirection: -1);
         blackboard.StartIntent(IntentKey, ticks: 300); // ~5s
     }
     public void Tick(Blackboard blackboard)
     {
-        var character = blackboard.Self.Character;
+        var character = blackboard.Self!.Character;
         if (character.controller is null)
         {
             IsFinished = true;
@@ -72,7 +72,7 @@ public sealed class MoveToTileAction : IAction
     }
     public void Abort(Blackboard blackboard)
     {
-        var character = blackboard.Self.Character;
+        var character = blackboard.Self!.Character;
         character.controller = previousController as StardewValley.Pathfinding.PathFindController;
         character.Halt();
         previousController = null;

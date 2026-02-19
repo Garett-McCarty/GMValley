@@ -1,6 +1,6 @@
 using StardewValley;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 internal static class DialogueContextBuilder
 {

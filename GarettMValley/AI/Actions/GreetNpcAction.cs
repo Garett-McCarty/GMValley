@@ -14,7 +14,7 @@ public sealed class GreetNpcAction : IAction
     public bool IsFinished { get; private set; } = false;
     public float Score(Blackboard blackboard)
     {
-        if (blackboard.Self.Kind != "villager") return 0.0f;
+        if (blackboard.Self!.Kind != "villager") return 0.0f;
         if (blackboard.IsOnCooldown("greet_npc")) return 0.0f;
 
         if (blackboard.NearestFriendlyId is null) return 0.0f;
@@ -26,7 +26,7 @@ public sealed class GreetNpcAction : IAction
     public void Start(Blackboard blackboard) { IsFinished = false; blackboard.StartIntent(IntentKey, 30); }
     public void Tick(Blackboard blackboard)
     {
-        blackboard.Self.FaceTile(blackboard.NearestFriendlyTile);
+        blackboard.Self!.FaceTile(blackboard.NearestFriendlyTile);
         blackboard.Self.Emote(20);
         blackboard.SetCooldown("greet_npc", 900);
         IsFinished = true;

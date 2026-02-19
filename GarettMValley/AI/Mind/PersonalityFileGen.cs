@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Characters;
-using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Emotion;
+using GarettMValley.AI.Mind.Personality;
 using Microsoft.Xna.Framework;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.AI.Mind;
 
-public sealed class PersonalityAutogen
+public sealed class PersonalityFileGen
 {
     private readonly IModHelper _helper;
     private readonly IMonitor _log;
 
-    public PersonalityAutogen(IModHelper helper, IMonitor log)
+    public PersonalityFileGen(IModHelper helper, IMonitor log)
     {
         _helper = helper;
         _log = log;

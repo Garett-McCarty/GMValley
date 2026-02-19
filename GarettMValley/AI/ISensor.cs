@@ -9,5 +9,9 @@ namespace GarettMValley.AI;
 /// </summary>
 public interface ISensor
 {
+    /// <summary>
+    /// Have our sensor, sense.
+    /// </summary>
+    /// <param name="blackboard"></param>
     void Sense(Blackboard blackboard);
 }

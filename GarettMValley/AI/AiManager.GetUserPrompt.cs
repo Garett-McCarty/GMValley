@@ -1,7 +1,6 @@
 using System.Text;
-using GarettMValley.AI.Mind;
-using StardewModdingAPI;
 using StardewValley;
+using GarettMValley.Dialogue;
 
 namespace GarettMValley.AI;
 

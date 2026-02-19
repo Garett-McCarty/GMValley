@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Dialogue;
 
 internal sealed class DialogueJsonModel
 {

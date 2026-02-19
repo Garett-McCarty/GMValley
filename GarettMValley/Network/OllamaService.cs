@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GarettMValley.AI;
+namespace GarettMValley.Network;
 
 /// <summary>
 /// Minimal, SMAPI-safe Ollama client for net6.0.
@@ -77,7 +77,7 @@ internal sealed class OllamaClient : IDisposable
         if (prompt is null)
             throw new ArgumentNullException(nameof(prompt));
 
-        var req = new OllamaGenerateRequest
+        var request = new OllamaGenerateRequest
         {
             Model = model,
             Prompt = prompt,
@@ -86,12 +86,12 @@ internal sealed class OllamaClient : IDisposable
             Options = options
         };
 
-        using var msg = new HttpRequestMessage(HttpMethod.Post, "api/generate")
+        using var message = new HttpRequestMessage(HttpMethod.Post, "api/generate")
         {
-            Content = new StringContent(JsonSerializer.Serialize(req, JsonOptions), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(request, JsonOptions), Encoding.UTF8, "application/json")
         };
 
-        using var resp = await _http.SendAsync(msg, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+        using var resp = await _http.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                                     .ConfigureAwait(false);
 
         var body = await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -151,8 +151,13 @@ internal sealed class OllamaClient : IDisposable
         return null;
     }
 
-    // --- DTOs ---
+    //
+    // Data Template Objects
+    //
 
+    /// <summary>
+    /// Generate an Ollama API Request JSON Data Model
+    /// </summary>
     private sealed class OllamaGenerateRequest
     {
         [JsonPropertyName("model")]
@@ -173,6 +178,9 @@ internal sealed class OllamaClient : IDisposable
         public IDictionary<string, object>? Options { get; set; }
     }
 
+    /// <summary>
+    /// Generate an Ollama API Response JSON Data Model
+    /// </summary>
     private sealed class OllamaGenerateResponse
     {
         [JsonPropertyName("model")]
@@ -187,7 +195,6 @@ internal sealed class OllamaClient : IDisposable
         [JsonPropertyName("done")]
         public bool Done { get; set; }
 
-        // These fields exist depending on model / server build; optional.
         [JsonPropertyName("total_duration")]
         public long? TotalDuration { get; set; }
 
@@ -199,6 +206,9 @@ internal sealed class OllamaClient : IDisposable
     }
 }
 
+/// <summary>
+/// Exception handler for an Ollama API (Request/Response).
+/// </summary>
 internal sealed class OllamaHttpException : Exception
 {
     public int StatusCode { get; }
@@ -214,6 +224,16 @@ internal sealed class OllamaHttpException : Exception
     }
 }
 
+/// <summary>
+/// Generate an Ollama API Result Record Data Model
+/// </summary>
+/// <param name="Text"></param>
+/// <param name="Model"></param>
+/// <param name="CreatedAt"></param>
+/// <param name="Done"></param>
+/// <param name="TotalDuration"></param>
+/// <param name="PromptEvalCount"></param>
+/// <param name="EvalCount"></param>
 internal readonly record struct OllamaGenerateResult(
     string Text,
     string? Model,

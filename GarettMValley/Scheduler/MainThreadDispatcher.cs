@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
-namespace GarettMValley;
+namespace GarettMValley.Scheduler;
 
 internal sealed class MainThreadDispatcher
 {

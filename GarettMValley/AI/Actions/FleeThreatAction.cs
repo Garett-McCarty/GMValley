@@ -19,7 +19,7 @@ public sealed class FleeThreatAction : IAction
     public void Start(Blackboard blackboard) { IsFinished = false; _steps = 0; }
     public void Tick(Blackboard blackboard)
     {
-        var away = blackboard.Self.Tile - blackboard.ThreatTile;
+        var away = blackboard.Self!.Tile - blackboard.ThreatTile;
         var target = blackboard.Self.Tile + AI.Utils.ClampToOne(away);
         blackboard.Self.TryMoveToward(target);
         _steps += 1;
@@ -35,7 +35,7 @@ public sealed class FleeThreatAction : IAction
 
     public void Abort(Blackboard blackboard)
     {
-        blackboard.Self.StopMoving();
+        blackboard.Self!.StopMoving();
         IsFinished = true;
     }
 }

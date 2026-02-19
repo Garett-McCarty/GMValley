@@ -2,6 +2,9 @@ using Microsoft.Xna.Framework;
 
 namespace GarettMValley.AI;
 
+/// <summary>
+/// AI related utility helpers
+/// </summary>
 public static class Utils
 {
     /// <summary>

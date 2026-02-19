@@ -2,7 +2,7 @@
 using StardewValley;
 using Microsoft.Xna.Framework;
 using StardewValley.Characters;
-using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Emotion;
 
 namespace GarettMValley.AI.Sensors;
 
@@ -20,7 +20,7 @@ public sealed class NearbyAgentSensor : ISensor
         Vector2 nearestTile = default;
         float nearestDistSq = float.MaxValue;
 
-        foreach (var character in blackboard.Location.characters)
+        foreach (var character in blackboard.Location!.characters)
         {
             if (character is null) continue;
             if (ReferenceEquals(character, blackboard.SelfRaw)) continue;
@@ -28,7 +28,7 @@ public sealed class NearbyAgentSensor : ISensor
             if (character is not NPC npc) continue;
             if (character is Pet) continue;
 
-            float distanceSq = Vector2.DistanceSquared(npc.Tile, blackboard.Self.Tile);
+            float distanceSq = Vector2.DistanceSquared(npc.Tile, blackboard.Self!.Tile);
             if (distanceSq <= RadiusTilesSq)
             {
                 count += 1;

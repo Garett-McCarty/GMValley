@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace GarettMValley.AI.Mind;
+namespace GarettMValley.AI.Mind.Emotion;
 
 public struct EmotionalState
 {

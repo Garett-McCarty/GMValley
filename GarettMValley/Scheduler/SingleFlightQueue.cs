@@ -4,7 +4,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 
-namespace GarettMValley;
+namespace GarettMValley.Scheduler;
 
 internal sealed class SingleFlightQueue : IDisposable
 {

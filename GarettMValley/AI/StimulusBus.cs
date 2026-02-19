@@ -9,6 +9,9 @@ namespace GarettMValley.AI;
 /// </summary>
 public sealed class StimulusBus
 {
+    /// <summary>
+    /// Stimulus Bus partioned by the different map locations.
+    /// </summary>
     private readonly Dictionary<string, List<Stimulus>> _byLocation = new();
     private int _generation;
 

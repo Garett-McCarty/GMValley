@@ -6,6 +6,15 @@ namespace GarettMValley.AI.Pathing;
 
 public static class PathControllerFactory
 {
+    /// <summary>
+    /// Create a PathFinding controller
+    /// </summary>
+    /// <param name="character"></param>
+    /// <param name="location"></param>
+    /// <param name="targetTile"></param>
+    /// <param name="finalFacingDirection"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public static object CreatePathFindController(Character character, GameLocation location, Vector2 targetTile, int finalFacingDirection = -1)
     {
         var end = new Point((int)targetTile.X, (int)targetTile.Y);

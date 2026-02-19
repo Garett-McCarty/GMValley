@@ -1,5 +1,5 @@
 
-namespace GarettMValley.AI.Mind;
+namespace GarettMValley.AI.Mind.Emotion;
 
 /// <summary>
 /// Emotion delta

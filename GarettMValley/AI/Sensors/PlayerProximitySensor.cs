@@ -1,5 +1,5 @@
 
-using GarettMValley.AI.Mind;
+using GarettMValley.AI.Mind.Emotion;
 using Microsoft.Xna.Framework;
 
 namespace GarettMValley.AI.Sensors;
@@ -13,7 +13,7 @@ public sealed class PlayerProximitySensor : ISensor
 
     public void Sense(Blackboard blackboard)
     {
-        float distanceSq = Vector2.DistanceSquared(blackboard.Self.Tile, blackboard.Player.Tile);
+        float distanceSq = Vector2.DistanceSquared(blackboard.Self!.Tile, blackboard.Player!.Tile);
         blackboard.DistanceToPlayerTiles = MathF.Sqrt(distanceSq);
         bool isNear = distanceSq < NearRadiusTilesSq;
         blackboard.PlayerIsNear = isNear;

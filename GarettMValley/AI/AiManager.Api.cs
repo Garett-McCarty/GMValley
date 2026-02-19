@@ -9,6 +9,9 @@ namespace GarettMValley.AI;
 
 public sealed partial class AiManager
 {
+    /// <summary>
+    /// Latest agent world snapshot
+    /// </summary>
     private volatile AgentWorldSnapshot _latestSnapshot = new(
         Utc: DateTime.UtcNow,
         WorldReady: false,
@@ -28,6 +31,11 @@ public sealed partial class AiManager
     /// <returns></returns>
     public AgentWorldSnapshot GetLatestSnapshot() => _latestSnapshot;
 
+    /// <summary>
+    /// Attempt to get an AgentSnapshot for a given unique id
+    /// </summary>
+    /// <param name="id">Unique identifier of the agent</param>
+    /// <returns></returns>
     public AgentSnapshot? TryGetAgentSnapshot(string id)
     {
         var snap = _latestSnapshot;
@@ -44,15 +52,14 @@ public sealed partial class AiManager
         foreach (var (id, runtime) in _agents)
         {
             var adapter = runtime.GetAdapterForDebug();
-            var bb = runtime.GetBlackboard();
-            var emotion = bb.Emotion;
-            var personality = bb.Personality;
-            var moveTarget = bb.MoveTargetTile;
+            var blackboard = runtime.GetBlackboard();
+            var emotion = blackboard.Emotion;
+            var personality = blackboard.Personality;
+            var moveTarget = blackboard.MoveTargetTile;
 
             string? name = null;
             try
             {
-                // Character.Name is usually safe, but keep try/catch defensive.
                 name = adapter.Character?.Name;
             }
             catch { /* ignored */ }
@@ -65,18 +72,18 @@ public sealed partial class AiManager
                 TileX: adapter.Tile.X,
                 TileY: adapter.Tile.Y,
                 CurrentAction: runtime.GetCurrentAction()?.IntentKey,
-                IntentKey: bb.IntentKey,
-                IntentTicksLeft: bb.IntentTicksLeft,
-                DistanceToPlayerTiles: bb.DistanceToPlayerTiles,
-                PlayerIsNear: bb.PlayerIsNear,
-                ThreatNearby: bb.ThreatNearby,
-                ThreatTileX: bb.ThreatTile.X,
-                ThreatTileY: bb.ThreatTile.Y,
-                NearbyAgentsCount: bb.NearbyAgentsCount,
-                NearestFriendlyId: bb.NearestFriendlyId,
-                NearestFriendlyTileX: bb.NearestFriendlyTile.X,
-                NearestFriendlyTileY: bb.NearestFriendlyTile.Y,
-                DistToNearestFriendlyTiles: bb.DistToNearestFriendlyTiles,
+                IntentKey: blackboard.IntentKey,
+                IntentTicksLeft: blackboard.IntentTicksLeft,
+                DistanceToPlayerTiles: blackboard.DistanceToPlayerTiles,
+                PlayerIsNear: blackboard.PlayerIsNear,
+                ThreatNearby: blackboard.ThreatNearby,
+                ThreatTileX: blackboard.ThreatTile.X,
+                ThreatTileY: blackboard.ThreatTile.Y,
+                NearbyAgentsCount: blackboard.NearbyAgentsCount,
+                NearestFriendlyId: blackboard.NearestFriendlyId,
+                NearestFriendlyTileX: blackboard.NearestFriendlyTile.X,
+                NearestFriendlyTileY: blackboard.NearestFriendlyTile.Y,
+                DistToNearestFriendlyTiles: blackboard.DistToNearestFriendlyTiles,
                 MoveTargetTileX: moveTarget?.X,
                 MoveTargetTileY: moveTarget?.Y,
                 Emotion: new EmotionSnapshot(
