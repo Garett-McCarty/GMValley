@@ -83,7 +83,7 @@ public sealed partial class AiManager
                 NearestFriendlyId: blackboard.NearestFriendlyId,
                 NearestFriendlyTileX: blackboard.NearestFriendlyTile.X,
                 NearestFriendlyTileY: blackboard.NearestFriendlyTile.Y,
-                DistToNearestFriendlyTiles: blackboard.DistToNearestFriendlyTiles,
+                DistToNearestFriendlyTiles: blackboard.DistanceToNearestFriendly,
                 MoveTargetTileX: moveTarget?.X,
                 MoveTargetTileY: moveTarget?.Y,
                 Emotion: new EmotionSnapshot(

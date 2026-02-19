@@ -5,6 +5,7 @@ using StardewValley.Monsters;
 using GarettMValley;
 using GarettMValley.AI;
 using System.Net;
+using GarettMValley.AI.Emote;
 
 namespace GarettMValley.AI.Actions;
 
@@ -25,7 +26,8 @@ public sealed class FleeThreatAction : IAction
         _steps += 1;
         if (_steps == 1 && !blackboard.IsOnCooldown("flee_emote"))
         {
-            blackboard.Self.Emote(12);
+            int emote = EmotePicker.Pick(blackboard.Emotion, threatNearby: true, EmoteContext.Threat);
+            blackboard.Self.Emote(emote);
             blackboard.SetCooldown("flee_emote", 180);
         }
 

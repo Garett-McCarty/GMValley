@@ -45,7 +45,7 @@ public sealed class NearbyAgentSensor : ISensor
         blackboard.NearbyAgentsCount = count;
         blackboard.NearestFriendlyId = nearestId;
         blackboard.NearestFriendlyTile = nearestTile;
-        blackboard.DistToNearestFriendlyTiles = nearestDistSq == float.MaxValue ? float.MaxValue : MathF.Sqrt(nearestDistSq);
+        blackboard.DistanceToNearestFriendly = nearestDistSq == float.MaxValue ? float.MaxValue : MathF.Sqrt(nearestDistSq);
 
         if (count <= 0)
             return;

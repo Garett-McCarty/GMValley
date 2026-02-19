@@ -80,7 +80,7 @@ public sealed class Blackboard
     /// <summary>
     /// Distance to the nearest friendly entity in tiles
     /// </summary>
-    public float DistToNearestFriendlyTiles { get; set; } = float.MaxValue;
+    public float DistanceToNearestFriendly { get; set; } = float.MaxValue;
 
     /// <summary>
     /// Count of all nearby agents

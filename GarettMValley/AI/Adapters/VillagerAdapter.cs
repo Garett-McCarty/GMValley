@@ -23,7 +23,12 @@ public sealed class VillagerAdapter : IAgentAdapter
 
     public void FaceTile(Vector2 targetTile) => _npc.faceGeneralDirection(targetTile * 64.0f, 0, false);
     public void Emote(int emoteId) => _npc.doEmote(emoteId);
-    public void Say(string text) => StardewValley.Game1.DrawDialogue(_npc, text);
+    public void Say(string text)
+    {
+        _npc.TemporaryDialogue = new Stack<StardewValley.Dialogue>();
+        _npc.TemporaryDialogue.Append(new StardewValley.Dialogue(_npc, "", text));
+        StardewValley.Game1.drawDialogue(_npc);
+    }
     public void TryMoveToward(Vector2 targetTile)
     {
         _npc.tryToMoveInDirection(Utils.DirectionToward(_npc.Tile, targetTile), false, 0, false);
