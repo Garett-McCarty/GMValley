@@ -5,7 +5,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 
-using GarettMValley.AI;
+using GarettMValley.Agent;
 using GarettMValley.Scheduler;
 
 namespace GarettMValley.Dialogue;

@@ -4,7 +4,7 @@ namespace GarettMValley;
 /// <summary>
 /// Configuration for GarettMValley
 /// </summary>
-public sealed class ModConfig
+public sealed class ModConfig: ICloneable
 {
     /// <summary>
     /// Allow custom dialogue
@@ -95,4 +95,27 @@ public sealed class ModConfig
     /// Welcome Message!
     /// </summary>
     public string Message { get; set; } = "Welcome to GarettM Valley! NPC AI Behavior and Agency MOD";
+
+    public object Clone() => FromSelf();
+    public ModConfig FromSelf() => new()
+    {
+        AllowDialogue = this.AllowDialogue,
+        AllowGeneratedDialogue = this.AllowGeneratedDialogue,
+        AllowVillagerAgency = this.AllowVillagerAgency,
+        AllowMonsterAgency = this.AllowMonsterAgency,
+        AllowPetsAgency = this.AllowPetsAgency,
+        AllowAnimalAgency = this.AllowAnimalAgency,
+        Debug = this.Debug,
+        DebugLog = this.DebugLog,
+        EnableOllama = this.EnableOllama,
+        OllamaUrl = this.OllamaUrl,
+        OllamaModel = this.OllamaModel,
+        OllamaTimeout = this.OllamaTimeout,
+        EnableHttpApi = this.EnableHttpApi,
+        HttpApiBindAddress = this.HttpApiBindAddress,
+        HttpApiPort = this.HttpApiPort,
+        HttpApiKey = this.HttpApiKey,
+        EnableMod = this.EnableMod,
+        Message = this.Message,
+    };
 }

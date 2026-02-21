@@ -3,7 +3,7 @@ using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using GarettMValley.AI;
+using GarettMValley.Agent;
 using StardewModdingAPI;
 
 namespace GarettMValley.Network;
@@ -21,7 +21,14 @@ namespace GarettMValley.Network;
 /// </summary>
 public sealed class AgentApiServer : IDisposable
 {
-    private readonly IMonitor _log;
+    /// <summary>
+    /// Reference to our Monitor (logging) service
+    /// </summary>
+    private readonly IMonitor _monitor;
+
+    /// <summary>
+    /// 
+    /// </summary>
     private readonly AiManager _ai;
     private readonly ModConfig _config;
     private readonly HttpListener _listener = new();
@@ -34,15 +41,27 @@ public sealed class AgentApiServer : IDisposable
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    public AgentApiServer(IMonitor log, AiManager ai, ModConfig config)
+    /// <summary>
+    /// Create a new AgentApiServer HTTP server
+    /// </summary>
+    /// <param name="monitor"></param>
+    /// <param name="ai"></param>
+    /// <param name="config"></param>
+    public AgentApiServer(IMonitor monitor, AiManager ai, ModConfig config)
     {
-        _log = log;
+        _monitor = monitor;
         _ai = ai;
         _config = config;
     }
 
+    /// <summary>
+    /// Determine if the HTTP client is running
+    /// </summary>
     public bool IsRunning => _listener.IsListening;
 
+    /// <summary>
+    /// Start the HTTP server
+    /// </summary>
     public void Start()
     {
         if (!_config.EnableHttpApi)
@@ -61,25 +80,31 @@ public sealed class AgentApiServer : IDisposable
             _listener.Prefixes.Add(prefix);
             _listener.Start();
             _loopTask = Task.Run(() => LoopAsync(_cts.Token));
-            _log.Log($"Agent debug HTTP API listening on {prefix}", LogLevel.Info);
+            _monitor.Log($"Agent debug HTTP API listening on {prefix}", LogLevel.Info);
         }
         catch (HttpListenerException ex)
         {
-            _log.Log($"Failed to start debug HTTP API on {prefix}: {ex.Message}", LogLevel.Error);
-            _log.Log("Tip: if the port is in use, change HttpApiPort in config.json.", LogLevel.Info);
+            _monitor.Log($"Failed to start debug HTTP API on {prefix}: {ex.Message}", LogLevel.Error);
+            _monitor.Log("Tip: if the port is in use, change HttpApiPort in config.json.", LogLevel.Info);
         }
         catch (Exception ex)
         {
-            _log.Log($"Failed to start debug HTTP API: {ex}", LogLevel.Error);
+            _monitor.Log($"Failed to start debug HTTP API: {ex}", LogLevel.Error);
         }
     }
 
+    /// <summary>
+    /// Stop the HTTP server
+    /// </summary>
     public void Stop()
     {
         try { _cts.Cancel(); } catch { }
         try { if (_listener.IsListening) _listener.Stop(); } catch { }
     }
 
+    /// <summary>
+    /// Destruct the HTTP stuff once we are no longer being used.
+    /// </summary>
     public void Dispose()
     {
         Stop();
@@ -87,6 +112,11 @@ public sealed class AgentApiServer : IDisposable
         try { _cts.Dispose(); } catch { }
     }
 
+    /// <summary>
+    /// HTTP Asynchronous Loop
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
     private async Task LoopAsync(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
@@ -100,12 +130,17 @@ public sealed class AgentApiServer : IDisposable
             catch (HttpListenerException) { return; } // stopped
             catch (Exception ex)
             {
-                _log.Log($"Debug HTTP API loop error: {ex.Message}", LogLevel.Warn);
+                _monitor.Log($"Debug HTTP API loop error: {ex.Message}", LogLevel.Warn);
                 await Task.Delay(100, token).ConfigureAwait(false);
             }
         }
     }
 
+    /// <summary>
+    /// Handle a request asynchronously
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <returns></returns>
     private async Task HandleRequestAsync(HttpListenerContext ctx)
     {
         var req = ctx.Request;
@@ -205,20 +240,32 @@ public sealed class AgentApiServer : IDisposable
         }
     }
 
-    private bool IsAuthorized(HttpListenerRequest req)
+    /// <summary>
+    /// Determine if a request is authorized with the correct API key, if API key is set.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    private bool IsAuthorized(HttpListenerRequest request)
     {
         if (string.IsNullOrWhiteSpace(_config.HttpApiKey))
             return true;
 
-        var provided = req.Headers["X-Api-Key"];
+        var provided = request.Headers["X-Api-Key"];
         return string.Equals(provided, _config.HttpApiKey, StringComparison.Ordinal);
     }
 
-    private static async Task WriteJsonAsync(HttpListenerResponse res, int status, object payload)
+    /// <summary>
+    /// Write JSON output asynchronously
+    /// </summary>
+    /// <param name="response"></param>
+    /// <param name="status"></param>
+    /// <param name="payload"></param>
+    /// <returns></returns>
+    private static async Task WriteJsonAsync(HttpListenerResponse response, int status, object payload)
     {
-        res.StatusCode = status;
-        res.ContentType = "application/json; charset=utf-8";
-        await JsonSerializer.SerializeAsync(res.OutputStream, payload, payload.GetType(), JsonOptions)
+        response.StatusCode = status;
+        response.ContentType = "application/json; charset=utf-8";
+        await JsonSerializer.SerializeAsync(response.OutputStream, payload, payload.GetType(), JsonOptions)
             .ConfigureAwait(false);
     }
 }

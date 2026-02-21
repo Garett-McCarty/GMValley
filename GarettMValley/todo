@@ -1,2 +1,0 @@
-- Stimululus Bus is disconnected, wire NearbyThreatSensor, and PlayerProximitySensor to influence action selection.
-- Emotion integration is incomplete, actions should vary behavior based on emotional state

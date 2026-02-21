@@ -6,9 +6,10 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
-using GarettMValley.AI;
+using GarettMValley.Agent;
 using GarettMValley.Dialogue;
 using GarettMValley.Network;
+using GarettMValley.UI;
 
 namespace GarettMValley;
 
@@ -18,9 +19,9 @@ namespace GarettMValley;
 public sealed class ModEntry : Mod
 {
     /// <summary>
-    /// Instance to our mod configuration
+    /// Instance to our modss configuration
     /// </summary>
-    private ModConfig Config = new();
+    internal ModConfig Config { get; private set; } = new();
 
     /// <summary>
     /// Instance to our AI Manager
@@ -30,6 +31,8 @@ public sealed class ModEntry : Mod
     private AgentApiServer ApiServer = null!;
 
     private DialogueSystem DialogueManager = null!;
+
+    private UiManager UiManager = null!;
 
 
     /// <summary>
@@ -41,6 +44,12 @@ public sealed class ModEntry : Mod
         try
         {
             Config = helper.ReadConfig<ModConfig>();
+            if (!Config.EnableMod)
+            {
+                Monitor.Log("GarettMValley is disabled in MOD Configuration, Bailing out!");
+                return;
+            }
+
             Monitor.Log("GarettMValley loading…", LogLevel.Info);
             
             AiManager = new AiManager(Monitor, Config);
@@ -51,6 +60,12 @@ public sealed class ModEntry : Mod
 
             ApiServer = new AgentApiServer(Monitor, AiManager, Config);
             ApiServer.Start();
+
+            UiManager = new UiManager(Monitor, Helper, () => this.Config, (cfg) => this.Config = cfg, (cfg) =>
+            {
+                // TODO: Propagate to different subsystems that our configuration has been updated.
+            });
+            UiManager.Initialize();
 
             helper.Events.GameLoop.ReturnedToTitle += (_, _) => ApiServer?.Stop();
             helper.Events.GameLoop.GameLaunched += (_, _) => ApiServer?.Start();
