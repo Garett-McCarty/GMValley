@@ -1,9 +1,4 @@
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-using StardewValley;
-using StardewValley.Monsters;
-using GarettMValley;
-using GarettMValley.Agent;
+using GarettMValley.Agent.Mind;
 
 namespace GarettMValley.Agent;
 
@@ -11,10 +6,9 @@ public interface IAction
 {
     string IntentKey { get; }
     bool IsFinished { get; }
-    float Score(Blackboard blackboard);
-    bool CanContinue(Blackboard blackboard);
-
-    void Start(Blackboard blackboard);
-    void Tick(Blackboard blackboard);
-    void Abort(Blackboard blackboard);
+    float Score(MindState mindstate);
+    bool CanContinue(MindState mindstate);
+    void Start(MindState mindstate);
+    void Tick(MindState mindstate);
+    void Abort(MindState mindstate);
 }

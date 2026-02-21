@@ -1,6 +1,4 @@
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-using StardewValley;
+using GarettMValley.Agent.Mind;
 
 namespace GarettMValley.Agent;
 
@@ -10,8 +8,8 @@ namespace GarettMValley.Agent;
 public interface ISensor
 {
     /// <summary>
-    /// Have our sensor, sense.
+    /// Have the agent sense the world and have it reflect in our mindstate.
     /// </summary>
-    /// <param name="blackboard"></param>
-    void Sense(Blackboard blackboard);
+    /// <param name="mindstate">How the agent visualizes the world</param>
+    void Sense(MindState mindstate);
 }

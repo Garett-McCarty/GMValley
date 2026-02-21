@@ -1,21 +1,21 @@
 using System.Text;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Mind.Emotion;
 using GarettMValley.Agent.Mind.Personality;
-using StardewModdingAPI;
 using StardewValley;
 
 namespace GarettMValley.Agent;
 
-public sealed partial class AiManager
+public sealed partial class AgentManager
 {
     public string GetSystemPromptForNPC(NPC npc)
     {
-        Blackboard? blackboard = null;
+        MindState? mindstate = null;
         string? action = null;
         string? intent = null;
-        TryGetRuntimeForNpc(npc, out blackboard, out action, out intent);
-        PersonalityProfile personalityProfile = blackboard?.Personality ?? new PersonalityProfile { Key = "default" };
-        EmotionalState emotionalState = blackboard?.Emotion ?? EmotionalState.Neutral;
+        TryGetRuntimeForNpc(npc, out mindstate, out action, out intent);
+        PersonalityProfile personalityProfile = mindstate?.Personality ?? new PersonalityProfile { Key = "default" };
+        EmotionalState emotionalState = mindstate?.Emotion ?? EmotionalState.Neutral;
         string personalitySummary = $"Key={personalityProfile.Key}; Sociability={personalityProfile.Sociability:0.00}; Bravery={personalityProfile.Bravery:0.00}; Curiosity={personalityProfile.Curiosity:0.00}; Neuroticism={personalityProfile.Neuroticism:0.00}; Dominance={personalityProfile.Dominance:0.00}";
         string emotionSummary = $"Valence={emotionalState.Valence:0.00}; Arousal={emotionalState.Arousal:0.00}; Dominance={emotionalState.Dominance:0.00}; Stress={emotionalState.Stress:0.00}; SocialNeed={emotionalState.SocialNeed:0.00}; Curiosity={emotionalState.Curiosity:0.00}; Fatigue={emotionalState.Fatigue:0.00}";
         string characterTemplate = this._personalities.GetPromptForCharacterName(npc.Name);

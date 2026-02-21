@@ -5,6 +5,7 @@ using StardewValley.Monsters;
 using GarettMValley;
 using GarettMValley.Agent;
 using Microsoft.Xna.Framework;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Pathing;
 
 namespace GarettMValley.Agent.Actions;
@@ -19,65 +20,65 @@ public sealed class MoveToTileAction : IAction
     private object? previousController;
 
     public bool IsFinished { get; private set; } = false;
-    public float Score(Blackboard blackboard)
+    public float Score(MindState mindstate)
     {
-        if (blackboard.MoveTargetTile is null)
+        if (mindstate.MoveTargetTile is null)
             return 0.0f;
         if (!Game1.IsMasterGame)
             return 0.0f;
         return 0.9f;
     }
-    public bool CanContinue(Blackboard blackboard) => blackboard.MoveTargetTile is not null;
-    public void Start(Blackboard blackboard) {
+    public bool CanContinue(MindState mindstate) => mindstate.MoveTargetTile is not null;
+    public void Start(MindState mindstate) {
         IsFinished = false;
         stuckTicks = 0;
-        targetTile = blackboard.MoveTargetTile!.Value;
-        lastTile = blackboard.Self!.Tile;
-        var character = blackboard.Self.Character;
-        var location = blackboard.Location;
+        targetTile = mindstate.MoveTargetTile!.Value;
+        lastTile = mindstate.Self!.Tile;
+        var character = mindstate.Self.Character;
+        var location = mindstate.Location;
         previousController = character.controller;
         character.controller = (StardewValley.Pathfinding.PathFindController)PathControllerFactory.CreatePathFindController(character, location!, targetTile, finalFacingDirection: -1);
-        blackboard.StartIntent(IntentKey, ticks: 300); // ~5s
+        mindstate.StartIntent(IntentKey, ticks: 300); // ~5s
     }
-    public void Tick(Blackboard blackboard)
+    public void Tick(MindState mindstate)
     {
-        var character = blackboard.Self!.Character;
+        var character = mindstate.Self!.Character;
         if (character.controller is null)
         {
             IsFinished = true;
-            blackboard.ClearMoveTarget();
-            blackboard.ClearIntent();
+            mindstate.ClearMoveTarget();
+            mindstate.ClearIntent();
             return;
         }
 
-        if (Vector2.Distance(blackboard.Self.Tile, targetTile) <= 0.1f)
+        if (Vector2.Distance(mindstate.Self.Tile, targetTile) <= 0.1f)
         {
             character.controller = null;
             character.Halt();
             IsFinished = true;
-            blackboard.ClearMoveTarget();
-            blackboard.ClearIntent();
+            mindstate.ClearMoveTarget();
+            mindstate.ClearIntent();
             return;
         }
 
-        if (Vector2.Distance(blackboard.Self.Tile, lastTile) < 0.01f)
+        if (Vector2.Distance(mindstate.Self.Tile, lastTile) < 0.01f)
             stuckTicks += 1;
         else
             stuckTicks = 0;
-        lastTile = blackboard.Self.Tile;
+        lastTile = mindstate.Self.Tile;
         if (stuckTicks >= 4)
         {
-            Abort(blackboard);
+            Abort(mindstate);
         }
     }
-    public void Abort(Blackboard blackboard)
+    public void Abort(MindState mindstate)
     {
-        var character = blackboard.Self!.Character;
+        var character = mindstate.Self!.Character;
         character.controller = previousController as StardewValley.Pathfinding.PathFindController;
         character.Halt();
         previousController = null;
         IsFinished = true;
-        blackboard.ClearMoveTarget();
-        blackboard.ClearIntent();
+        mindstate.ClearMoveTarget();
+        mindstate.ClearIntent();
     }
 }

@@ -1,4 +1,4 @@
-
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Mind.Emotion;
 using Microsoft.Xna.Framework;
 
@@ -11,17 +11,17 @@ public sealed class PlayerProximitySensor : ISensor
     private const int NearPulseCooldown = 4;
     private const int FarPulseCooldown = 20;
 
-    public void Sense(Blackboard blackboard)
+    public void Sense(MindState mindstate)
     {
-        float distanceSq = Vector2.DistanceSquared(blackboard.Self!.Tile, blackboard.Player!.Tile);
-        blackboard.DistanceToPlayerTiles = MathF.Sqrt(distanceSq);
+        float distanceSq = Vector2.DistanceSquared(mindstate.Self!.Tile, mindstate.Player!.Tile);
+        mindstate.DistanceToPlayerTiles = MathF.Sqrt(distanceSq);
         bool isNear = distanceSq < NearRadiusTilesSq;
-        blackboard.PlayerIsNear = isNear;
+        mindstate.PlayerIsNear = isNear;
         if (isNear)
         {
-            if(blackboard.TryPulseCooldown("emotion:player_near", NearPulseCooldown))
+            if(mindstate.TryPulseCooldown("emotion:player_near", NearPulseCooldown))
             {
-                float n = 1.0f - MathHelper.Clamp(blackboard.DistanceToPlayerTiles / NearRadiusTiles, 0.0f, 1.0f);
+                float n = 1.0f - MathHelper.Clamp(mindstate.DistanceToPlayerTiles / NearRadiusTiles, 0.0f, 1.0f);
 
                 EmotionDelta delta = new EmotionDelta
                 {
@@ -32,12 +32,12 @@ public sealed class PlayerProximitySensor : ISensor
                     Dominance = +0.01f * n,
                 };
 
-                blackboard.ApplyDelta(blackboard.Personality.ApplyPersonalityTo(delta));
+                mindstate.ApplyDelta(mindstate.Personality.ApplyPersonalityTo(delta));
             };
         }
         else
         {
-            if (blackboard.TryPulseCooldown("emotion:player_far", FarPulseCooldown))
+            if (mindstate.TryPulseCooldown("emotion:player_far", FarPulseCooldown))
             {
                 EmotionDelta delta = new EmotionDelta
                 {
@@ -46,7 +46,7 @@ public sealed class PlayerProximitySensor : ISensor
                     SocialNeed = +0.06f,
                     Curiosity = +0.01f,
                 };
-                blackboard.ApplyDelta(blackboard.Personality.ApplyPersonalityTo(delta));
+                mindstate.ApplyDelta(mindstate.Personality.ApplyPersonalityTo(delta));
             }
         }
     }

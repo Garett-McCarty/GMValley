@@ -7,12 +7,12 @@ using GarettMValley.Agent.Stimuli;
 using Microsoft.Xna.Framework;
 using StardewValley;
 
-namespace GarettMValley.Agent;
+namespace GarettMValley.Agent.Mind;
 
 /// <summary>
 /// Stores all the necessary state variables of an Agent.
 /// </summary>
-public sealed class Blackboard
+public sealed class MindState
 {
     /// <summary>
     /// Map of agent event cooldowns, Mapped as [action key => cooldown ticks in seconds].

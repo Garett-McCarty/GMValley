@@ -2,8 +2,6 @@ using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Monsters;
 
-using GarettMValley.Agent;
-
 namespace GarettMValley.Agent.Adapters;
 
 public sealed class MonsterAdapter : IAgentAdapter

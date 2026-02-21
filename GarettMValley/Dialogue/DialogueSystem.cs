@@ -28,7 +28,7 @@ public sealed class DialogueSystem : IDisposable
     /// <summary>
     /// Reference to our AI Manager
     /// </summary>
-    private AiManager? _ai;
+    private AgentManager? _ai;
 
     /// <summary>
     /// Flag to determine if we enable the dialogue system
@@ -40,7 +40,7 @@ public sealed class DialogueSystem : IDisposable
         _monitor = monitor;
     }
 
-    public void Hook(IModHelper helper, AiManager aiManager, string harmonyId)
+    public void Hook(IModHelper helper, AgentManager aiManager, string harmonyId)
     {
         _ai = aiManager;
         if (_ai.GetConfig().AllowDialogue)
@@ -125,8 +125,6 @@ public sealed class DialogueSystem : IDisposable
 
         ShowDialogue(npc, "thinking...");
 
-        string systemPrompt = _ai.GetSystemPromptForNPC(npc);
-        string userPrompt = _ai.GetUserPromptFor(npc, who, location);
         _dialogueService.StartNpcDialogue(
             npc,
             getSystemPrompt: () => _ai.GetSystemPromptForNPC(npc),

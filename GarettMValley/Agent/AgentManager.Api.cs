@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace GarettMValley.Agent;
 
-public sealed partial class AiManager
+public sealed partial class AgentManager
 {
     /// <summary>
     /// Latest agent world snapshot
@@ -58,10 +58,10 @@ public sealed partial class AiManager
         foreach (var (id, runtime) in _agents)
         {
             var adapter = runtime.GetAdapterForDebug();
-            var blackboard = runtime.GetBlackboard();
-            var emotion = blackboard.Emotion;
-            var personality = blackboard.Personality;
-            var moveTarget = blackboard.MoveTargetTile;
+            var mindstate = runtime.GetMindState();
+            var emotion = mindstate.Emotion;
+            var personality = mindstate.Personality;
+            var moveTarget = mindstate.MoveTargetTile;
 
             string? name = null;
             try
@@ -78,18 +78,18 @@ public sealed partial class AiManager
                 TileX: adapter.Tile.X,
                 TileY: adapter.Tile.Y,
                 CurrentAction: runtime.GetCurrentAction()?.IntentKey,
-                IntentKey: blackboard.IntentKey,
-                IntentTicksLeft: blackboard.IntentTicksLeft,
-                DistanceToPlayerTiles: blackboard.DistanceToPlayerTiles,
-                PlayerIsNear: blackboard.PlayerIsNear,
-                ThreatNearby: blackboard.ThreatNearby,
-                ThreatTileX: blackboard.ThreatTile.X,
-                ThreatTileY: blackboard.ThreatTile.Y,
-                NearbyAgentsCount: blackboard.NearbyAgentsCount,
-                NearestFriendlyId: blackboard.NearestFriendlyId,
-                NearestFriendlyTileX: blackboard.NearestFriendlyTile.X,
-                NearestFriendlyTileY: blackboard.NearestFriendlyTile.Y,
-                DistToNearestFriendlyTiles: blackboard.DistanceToNearestFriendly,
+                IntentKey: mindstate.IntentKey,
+                IntentTicksLeft: mindstate.IntentTicksLeft,
+                DistanceToPlayerTiles: mindstate.DistanceToPlayerTiles,
+                PlayerIsNear: mindstate.PlayerIsNear,
+                ThreatNearby: mindstate.ThreatNearby,
+                ThreatTileX: mindstate.ThreatTile.X,
+                ThreatTileY: mindstate.ThreatTile.Y,
+                NearbyAgentsCount: mindstate.NearbyAgentsCount,
+                NearestFriendlyId: mindstate.NearestFriendlyId,
+                NearestFriendlyTileX: mindstate.NearestFriendlyTile.X,
+                NearestFriendlyTileY: mindstate.NearestFriendlyTile.Y,
+                DistToNearestFriendlyTiles: mindstate.DistanceToNearestFriendly,
                 MoveTargetTileX: moveTarget?.X,
                 MoveTargetTileY: moveTarget?.Y,
                 Emotion: new EmotionSnapshot(

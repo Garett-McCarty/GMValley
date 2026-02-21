@@ -2,6 +2,7 @@
 using StardewValley;
 using Microsoft.Xna.Framework;
 using StardewValley.Characters;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Mind.Emotion;
 
 namespace GarettMValley.Agent.Sensors;
@@ -13,22 +14,22 @@ public sealed class NearbyAgentSensor : ISensor
     private const int SocialPulseCooldown = 4; // ~1s
     private const int CrowdPulseCooldown = 12; // ~3s
 
-    public void Sense(Blackboard blackboard)
+    public void Sense(MindState mindstate)
     {
         int count = 0;
         string? nearestId = null;
         Vector2 nearestTile = default;
         float nearestDistSq = float.MaxValue;
 
-        foreach (var character in blackboard.Location!.characters)
+        foreach (var character in mindstate.Location!.characters)
         {
             if (character is null) continue;
-            if (ReferenceEquals(character, blackboard.SelfRaw)) continue;
+            if (ReferenceEquals(character, mindstate.SelfRaw)) continue;
 
             if (character is not NPC npc) continue;
             if (character is Pet) continue;
 
-            float distanceSq = Vector2.DistanceSquared(npc.Tile, blackboard.Self!.Tile);
+            float distanceSq = Vector2.DistanceSquared(npc.Tile, mindstate.Self!.Tile);
             if (distanceSq <= RadiusTilesSq)
             {
                 count += 1;
@@ -42,15 +43,15 @@ public sealed class NearbyAgentSensor : ISensor
 
         }
 
-        blackboard.NearbyAgentsCount = count;
-        blackboard.NearestFriendlyId = nearestId;
-        blackboard.NearestFriendlyTile = nearestTile;
-        blackboard.DistanceToNearestFriendly = nearestDistSq == float.MaxValue ? float.MaxValue : MathF.Sqrt(nearestDistSq);
+        mindstate.NearbyAgentsCount = count;
+        mindstate.NearestFriendlyId = nearestId;
+        mindstate.NearestFriendlyTile = nearestTile;
+        mindstate.DistanceToNearestFriendly = nearestDistSq == float.MaxValue ? float.MaxValue : MathF.Sqrt(nearestDistSq);
 
         if (count <= 0)
             return;
         
-        if (blackboard.TryPulseCooldown("emotion:social_nearby", SocialPulseCooldown))
+        if (mindstate.TryPulseCooldown("emotion:social_nearby", SocialPulseCooldown))
         {
             float n = MathHelper.Clamp(count / 4.0f, 0.0f, 1.0f);
             EmotionDelta delta = new EmotionDelta
@@ -60,10 +61,10 @@ public sealed class NearbyAgentSensor : ISensor
                 Arousal = +0.02f * n,
             };
 
-            blackboard.ApplyDelta(blackboard.Personality.ApplyPersonalityTo(delta));
+            mindstate.ApplyDelta(mindstate.Personality.ApplyPersonalityTo(delta));
         }
 
-        if (count >= 5 && blackboard.TryPulseCooldown("emotion:social_crowd", CrowdPulseCooldown))
+        if (count >= 5 && mindstate.TryPulseCooldown("emotion:social_crowd", CrowdPulseCooldown))
         {
             float n = MathHelper.Clamp((count - 4) / 6.0f, 0.0f, 1.0f);
             EmotionDelta delta = new EmotionDelta
@@ -72,7 +73,7 @@ public sealed class NearbyAgentSensor : ISensor
                 Dominance = -0.02f * n,
             };
 
-            blackboard.ApplyDelta(blackboard.Personality.ApplyPersonalityTo(delta));
+            mindstate.ApplyDelta(mindstate.Personality.ApplyPersonalityTo(delta));
         }
     }
 }

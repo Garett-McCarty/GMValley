@@ -29,7 +29,7 @@ internal sealed class OllamaClient : IDisposable
     /// <summary>
     /// JSON serialization options
     /// </summary>
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -88,7 +88,7 @@ internal sealed class OllamaClient : IDisposable
 
         using var message = new HttpRequestMessage(HttpMethod.Post, "api/generate")
         {
-            Content = new StringContent(JsonSerializer.Serialize(request, JsonOptions), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(request, _jsonOptions), Encoding.UTF8, "application/json")
         };
 
         using var resp = await _http.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
@@ -103,7 +103,7 @@ internal sealed class OllamaClient : IDisposable
             throw new OllamaHttpException((int)resp.StatusCode, resp.ReasonPhrase ?? "HTTP error", details);
         }
 
-        var parsed = JsonSerializer.Deserialize<OllamaGenerateResponse>(body, JsonOptions)
+        var parsed = JsonSerializer.Deserialize<OllamaGenerateResponse>(body, _jsonOptions)
                         ?? throw new InvalidOperationException("Ollama returned empty JSON.");
 
         return new OllamaGenerateResult(

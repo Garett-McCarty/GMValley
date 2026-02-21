@@ -9,7 +9,6 @@ using GarettMValley.Agent.Mind.Personality;
 using GarettMValley.Agent.Stimuli;
 using GarettMValley.Dialogue;
 using StardewValley.Characters;
-using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GarettMValley.Agent;
@@ -17,12 +16,12 @@ namespace GarettMValley.Agent;
 /// <summary>
 /// Manager for AI Agents
 /// </summary>
-public sealed partial class AiManager
+public sealed partial class AgentManager
 {
     /// <summary>
     /// Reference to our logging instance
     /// </summary>
-    private readonly IMonitor _log;
+    private readonly IMonitor _monitor;
 
     /// <summary>
     /// Reference to our configuration
@@ -62,7 +61,7 @@ public sealed partial class AiManager
     /// <summary>
     /// Debug AI information
     /// </summary>
-    private bool Debug = true;
+    private bool _debug = true;
 
     /// <summary>
     /// Print about once/sec
@@ -72,7 +71,7 @@ public sealed partial class AiManager
     /// <summary>
     /// Debug text for debug mode
     /// </summary>
-    private readonly Dictionary<string, string> DebugAgentText = new();
+    private readonly Dictionary<string, string> _debugAgentText = new();
 
     /// <summary>
     /// Personality profiles for agents
@@ -88,10 +87,10 @@ public sealed partial class AiManager
     /// <summary>
     /// Construct a new AiManager
     /// </summary>
-    /// <param name="log">Logging instance</param>
-    public AiManager(IMonitor log, ModConfig config)
+    /// <param name="monitor">Logging instance</param>
+    public AgentManager(IMonitor monitor, ModConfig config)
     {
-        _log = log;
+        _monitor = monitor;
         _config = config;
     }
 
@@ -101,7 +100,7 @@ public sealed partial class AiManager
     /// <param name="helper"></param>
     public void Hook(IModHelper helper)
     {
-        _personalityAutogen = new PersonalityFileGen(helper, _log);
+        _personalityAutogen = new PersonalityFileGen(helper, _monitor);
         _personalities = new PersonalityLibrary(helper);
 
         helper.Events.Input.ButtonPressed += OnButtonPressed;
@@ -122,12 +121,12 @@ public sealed partial class AiManager
             return;
         if (e.Button == SButton.F8)
         {
-            _log.Log("Generating AI personalities off game data...", LogLevel.Info);
+            _monitor.Log("Generating AI personalities off game data...", LogLevel.Info);
             _personalityAutogen.GenerateFile(force: true);
-            _log.Log("Generated AI personalities off game data!", LogLevel.Info);
+            _monitor.Log("Generated AI personalities off game data!", LogLevel.Info);
         }
         if (e.Button == SButton.F9)
-            Debug = !Debug;
+            _debug = !_debug;
         if (e.Button == SButton.F10)
             _agents.Clear();
     }
@@ -156,7 +155,7 @@ public sealed partial class AiManager
         if (!e.IsMultipleOf(TickInterval))
             return;
 
-        bool debugPulse = Debug && e.IsMultipleOf(DebugEveryTicks);
+        bool debugPulse = _debug && e.IsMultipleOf(DebugEveryTicks);
 
         if (e.Ticks >= _nextApiSnapshotTick)
         {
@@ -177,7 +176,7 @@ public sealed partial class AiManager
         {
             var id = adapter.Id.Value;
             if (!_agents.TryGetValue(id, out var runtime))
-                _agents[id] = new AgentRuntime(adapter, _personalities!, _log);
+                _agents[id] = new AgentRuntime(adapter, _personalities!, _monitor);
             else
                 runtime.SetAdapter(adapter);
         }
@@ -195,11 +194,11 @@ public sealed partial class AiManager
             if (_agents.TryGetValue(id, out var runtime))
             {
                 runtime.Tick(location, player, _stimulusBus);
-                DebugAgentText[id] = runtime.GetDebugLine();
+                _debugAgentText[id] = runtime.GetDebugLine();
             }
             else
             {
-                DebugAgentText[id] = "rt-missing";
+                _debugAgentText[id] = "rt-missing";
             }
             
         }
@@ -220,7 +219,7 @@ public sealed partial class AiManager
     /// <param name="e"></param>
     private void OnRenderedHud(object? sender, RenderedHudEventArgs e)
     {
-        if (!Debug || !Context.IsWorldReady)
+        if (!_debug || !Context.IsWorldReady)
             return;
         var location = Game1.player?.currentLocation;
         if (location is null)
@@ -237,7 +236,7 @@ public sealed partial class AiManager
     /// <param name="e"></param>
     private void OnRenderedWorld(object? sender, RenderedWorldEventArgs e)
     {
-        if (!Debug || !Context.IsWorldReady)
+        if (!_debug || !Context.IsWorldReady)
             return;
         var location = Game1.currentLocation;
         if (location is null)
@@ -247,7 +246,7 @@ public sealed partial class AiManager
             var adapter = runtime.GetAdapterForDebug();
             if (Vector2.DistanceSquared(adapter.Tile, Game1.player.Tile) > ActiveRadiusTilesSq)
                 continue;
-            if (!DebugAgentText.TryGetValue(id, out var text))
+            if (!_debugAgentText.TryGetValue(id, out var text))
                 continue;
             DrawAgentLabel(e.SpriteBatch, adapter, text);
         }
@@ -289,7 +288,7 @@ public sealed partial class AiManager
         foreach (var id in toRemove)
         {
             _agents.Remove(id);
-            DebugAgentText.Remove(id);
+            _debugAgentText.Remove(id);
         }
     }
 
@@ -337,13 +336,13 @@ public sealed partial class AiManager
     /// Try getting a runtime for a given NPC
     /// </summary>
     /// <param name="npc"></param>
-    /// <param name="blackboard"></param>
+    /// <param name="mindstate"></param>
     /// <param name="currentActionKey"></param>
     /// <param name="intentKey"></param>
     /// <returns></returns>
-    public bool TryGetRuntimeForNpc(NPC npc, out Blackboard? blackboard, out string? currentActionKey, out string? intentKey)
+    public bool TryGetRuntimeForNpc(NPC npc, out MindState? mindstate, out string? currentActionKey, out string? intentKey)
     {
-        blackboard = null;
+        mindstate = null;
         currentActionKey = null;
         intentKey = null;
 
@@ -351,9 +350,9 @@ public sealed partial class AiManager
         if (!_agents.TryGetValue(id, out var agentRuntime))
             return false;
 
-        blackboard = agentRuntime.GetBlackboard();
+        mindstate = agentRuntime.GetMindState();
         currentActionKey = agentRuntime.GetCurrentAction()?.IntentKey;
-        intentKey = blackboard.IntentKey;
+        intentKey = mindstate.IntentKey;
         return true;
     }
 
@@ -373,7 +372,7 @@ public sealed partial class AiManager
             if (_personalities is null)
                 return false;
 
-            runtime = new AgentRuntime(adapter, _personalities, _log);
+            runtime = new AgentRuntime(adapter, _personalities, _monitor);
             _agents[id] = runtime;
         }
         else
@@ -422,9 +421,9 @@ public sealed partial class AiManager
         private IAgentAdapter _adapter;
 
         /// <summary>
-        /// Agents blackboard
+        /// Agents mindstate
         /// </summary>
-        private readonly Blackboard _blackboard = new();
+        private readonly MindState _mindstate = new();
 
         /// <summary>
         /// List of sensor inputs
@@ -497,45 +496,45 @@ public sealed partial class AiManager
         public void Tick(GameLocation location, Farmer player, StimulusBus bus)
         {
             // 1. Tick the Agents "awareness"
-            _blackboard.BeginTick(location, _adapter, player, bus);
+            _mindstate.BeginTick(location, _adapter, player, bus);
 
             // 2. Personality assignment
             var characterName = GetCharacterName(_adapter);
-            _blackboard.Personality = _personalities.GetForCharacterName(characterName);
+            _mindstate.Personality = _personalities.GetForCharacterName(characterName);
 
             // 3. Emotional decay
             const float gameTicksPerSecond = 60.0f;
             float delta = TickInterval / gameTicksPerSecond;
-            _blackboard.Emotion.DecayToward(baseline: _blackboard.Personality.Baseline, delta, halflife: _blackboard.Personality.EmotionalHalfLife);
+            _mindstate.Emotion.DecayToward(baseline: _mindstate.Personality.Baseline, delta, halflife: _mindstate.Personality.EmotionalHalfLife);
 
             // 4. Sensors apply emotional deltas, etc.
             foreach (var sensor in _sensors)
-                sensor.Sense(_blackboard);
-            if (_current is not null && _blackboard.HasIntent && _current.IntentKey == _blackboard.IntentKey && !_current.IsFinished)
+                sensor.Sense(_mindstate);
+            if (_current is not null && _mindstate.HasIntent && _current.IntentKey == _mindstate.IntentKey && !_current.IsFinished)
             {
-                if (_current.CanContinue(_blackboard))
+                if (_current.CanContinue(_mindstate))
                 {
-                    _current.Tick(_blackboard);
+                    _current.Tick(_mindstate);
                     return;
                 }
 
-                _current.Abort(_blackboard);
+                _current.Abort(_mindstate);
                 _current = null;
-                _blackboard.ClearIntent();
+                _mindstate.ClearIntent();
             }
-            var next = _brain.ChooseAction(_blackboard);
+            var next = _brain.ChooseAction(_mindstate);
             if (next is not null)
             {
                 var key = next.IntentKey;
                 if (_lastActionKey != key)
                 {
                     _lastActionKey = key;
-                    _log.Log($"AI[{_adapter.Id.Value}] {(_adapter.Kind)} -> {key} (intent={_blackboard.IntentKey}:{_blackboard.IntentTicksLeft})", LogLevel.Info);
+                    _log.Log($"AI[{_adapter.Id.Value}] {(_adapter.Kind)} -> {key} (intent={_mindstate.IntentKey}:{_mindstate.IntentTicksLeft})", LogLevel.Info);
                 }
             }
             _current = next;
-            _current?.Start(_blackboard);
-            _current?.Tick(_blackboard);
+            _current?.Start(_mindstate);
+            _current?.Tick(_mindstate);
         }
 
         /// <summary>
@@ -544,9 +543,9 @@ public sealed partial class AiManager
         /// <returns></returns>
         public string GetDebugLine()
         {
-            var emotion = _blackboard.Emotion;
+            var emotion = _mindstate.Emotion;
             return $"{_adapter.Kind} {GetCharacterName(_adapter)}\n" +
-                $"act={_current?.IntentKey ?? "none"} intent={_blackboard.IntentKey}:{_blackboard.IntentTicksLeft}\n" +
+                $"act={_current?.IntentKey ?? "none"} intent={_mindstate.IntentKey}:{_mindstate.IntentTicksLeft}\n" +
                 $"V={emotion.Valence:0.00} A={emotion.Arousal:0.00} D={emotion.Dominance:0.00} S={emotion.Stress:0.00}\n" +
                 $"Soc={emotion.SocialNeed:0.00} Cur={emotion.Curiosity:0.00} Fat={emotion.Fatigue:0.00}";
         }
@@ -567,15 +566,15 @@ public sealed partial class AiManager
         /// Determine if a player is nearby
         /// </summary>
         /// <returns></returns>
-        public bool DebugPlayerIsNear() => _blackboard.PlayerIsNear;
+        public bool DebugPlayerIsNear() => _mindstate.PlayerIsNear;
 
         public string BuildDialogueLine(NPC npc, Farmer who, GameLocation location)
         {
             // placeholder: later you’ll call your Ollama prompt builder heres
-            return $"({npc.Name}) mood={_blackboard.Emotion.Valence:0.00}/{_blackboard.Emotion.Arousal:0.00} intent={_blackboard.IntentKey}";
+            return $"({npc.Name}) mood={_mindstate.Emotion.Valence:0.00}/{_mindstate.Emotion.Arousal:0.00} intent={_mindstate.IntentKey}";
         }
 
-        public Blackboard GetBlackboard() => _blackboard;
+        public MindState GetMindState() => _mindstate;
         public IAction? GetCurrentAction() => _current;
     }
 }

@@ -1,23 +1,32 @@
 using System.Text;
 using StardewValley;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Dialogue;
 
 namespace GarettMValley.Agent;
 
-public sealed partial class AiManager
+public sealed partial class AgentManager
 {
+    /// <summary>
+    /// Generate a user prompt for a given scene
+    /// </summary>
+    /// <param name="npc"></param>
+    /// <param name="who"></param>
+    /// <param name="location"></param>
+    /// <param name="playerSaid"></param>
+    /// <returns></returns>
     public string GetUserPromptFor(NPC npc, Farmer who, GameLocation location, string playerSaid = "")
     {
-        Blackboard? blackboard = null;
+        MindState? mindstate = null;
         string? action = null;
         string? intent = null;
 
-        TryGetRuntimeForNpc(npc, out blackboard, out action, out intent);
+        TryGetRuntimeForNpc(npc, out mindstate, out action, out intent);
 
-        string emotionSummary = blackboard is null ? "unknown" : $"V={blackboard.Emotion.Valence:0.00} A={blackboard.Emotion.Arousal:0.00} D={blackboard.Emotion.Dominance:0.00} S={blackboard.Emotion.Stress:0.00}";
-        string socialSummary = blackboard is null ? "unknown" : $"nearbyFriends={blackboard.NearbyAgentsCount} threat={blackboard.ThreatNearby} distToPlayer={blackboard.DistanceToPlayerTiles:0.0}";
+        string emotionSummary = mindstate is null ? "unknown" : $"V={mindstate.Emotion.Valence:0.00} A={mindstate.Emotion.Arousal:0.00} D={mindstate.Emotion.Dominance:0.00} S={mindstate.Emotion.Stress:0.00}";
+        string socialSummary = mindstate is null ? "unknown" : $"nearbyFriends={mindstate.NearbyAgentsCount} threat={mindstate.ThreatNearby} distToPlayer={mindstate.DistanceToPlayerTiles:0.0}";
 
-        DialogueContext context = DialogueContextBuilder.BuildForAgentNPC(npc, who, location, currentAction: action, currentIntent: intent, emotionSummary: emotionSummary, personalitySummary: blackboard?.Personality?.Key ?? "default");
+        DialogueContext context = DialogueContextBuilder.BuildForAgentNPC(npc, who, location, currentAction: action, currentIntent: intent, emotionSummary: emotionSummary, personalitySummary: mindstate?.Personality?.Key ?? "default");
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("SCENE:");

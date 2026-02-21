@@ -19,23 +19,42 @@ namespace GarettMValley.Network;
 /// 
 /// If ModConfig.HttpApiKey is non-empty, requests must include header: X-Api-Key
 /// </summary>
-public sealed class AgentApiServer : IDisposable
+public sealed class DebugServer : IDisposable
 {
     /// <summary>
-    /// Reference to our Monitor (logging) service
+    /// Monitor (logging) service
     /// </summary>
     private readonly IMonitor _monitor;
 
     /// <summary>
-    /// 
+    /// Agent Manager
     /// </summary>
-    private readonly AiManager _ai;
+    private readonly AgentManager _agents;
+
+    /// <summary>
+    /// Mod Configuration
+    /// </summary>
     private readonly ModConfig _config;
+
+    /// <summary>
+    /// HTTP Listener instance
+    /// </summary>
     private readonly HttpListener _listener = new();
+
+    /// <summary>
+    /// Async cancellation token bag
+    /// </summary>
     private readonly CancellationTokenSource _cts = new();
+
+    /// <summary>
+    /// Async loop
+    /// </summary>
     private Task? _loopTask;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    /// <summary>
+    /// API Serializer options
+    /// </summary>
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -45,12 +64,12 @@ public sealed class AgentApiServer : IDisposable
     /// Create a new AgentApiServer HTTP server
     /// </summary>
     /// <param name="monitor"></param>
-    /// <param name="ai"></param>
+    /// <param name="agents"></param>
     /// <param name="config"></param>
-    public AgentApiServer(IMonitor monitor, AiManager ai, ModConfig config)
+    public DebugServer(IMonitor monitor, AgentManager agents, ModConfig config)
     {
         _monitor = monitor;
-        _ai = ai;
+        _agents = agents;
         _config = config;
     }
 
@@ -143,42 +162,42 @@ public sealed class AgentApiServer : IDisposable
     /// <returns></returns>
     private async Task HandleRequestAsync(HttpListenerContext ctx)
     {
-        var req = ctx.Request;
-        var res = ctx.Response;
+        var request = ctx.Request;
+        var response = ctx.Response;
 
         try
         {
             // CORS preflight (handy if you point a browser UI at this)
-            res.Headers["Access-Control-Allow-Origin"] = "*";
-            res.Headers["Access-Control-Allow-Methods"] = "GET,OPTIONS";
-            res.Headers["Access-Control-Allow-Headers"] = "Content-Type,X-Api-Key";
+            response.Headers["Access-Control-Allow-Origin"] = "*";
+            response.Headers["Access-Control-Allow-Methods"] = "GET,OPTIONS";
+            response.Headers["Access-Control-Allow-Headers"] = "Content-Type,X-Api-Key";
 
-            if (req.HttpMethod.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+            if (request.HttpMethod.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
             {
-                res.StatusCode = 204;
-                res.Close();
+                response.StatusCode = 204;
+                response.Close();
                 return;
             }
 
-            if (!req.HttpMethod.Equals("GET", StringComparison.OrdinalIgnoreCase))
+            if (!request.HttpMethod.Equals("GET", StringComparison.OrdinalIgnoreCase))
             {
-                await WriteJsonAsync(res, 405, new { error = "method_not_allowed" });
+                await WriteJsonAsync(response, 405, new { error = "method_not_allowed" });
                 return;
             }
 
-            if (!IsAuthorized(req))
+            if (!IsAuthorized(request))
             {
-                await WriteJsonAsync(res, 401, new { error = "unauthorized" });
+                await WriteJsonAsync(response, 401, new { error = "unauthorized" });
                 return;
             }
 
-            string path = (req.Url?.AbsolutePath ?? "/").TrimEnd('/');
+            string path = (request.Url?.AbsolutePath ?? "/").TrimEnd('/');
             if (string.IsNullOrEmpty(path))
                 path = "/";
 
             if (path == "/" || path == "/health")
             {
-                await WriteJsonAsync(res, 200, new
+                await WriteJsonAsync(response, 200, new
                 {
                     ok = true,
                     utc = DateTime.UtcNow,
@@ -189,14 +208,14 @@ public sealed class AgentApiServer : IDisposable
 
             if (path == "/snapshot")
             {
-                await WriteJsonAsync(res, 200, _ai.GetLatestSnapshot());
+                await WriteJsonAsync(response, 200, _agents.GetLatestSnapshot());
                 return;
             }
 
             if (path == "/agents")
             {
-                var snap = _ai.GetLatestSnapshot();
-                await WriteJsonAsync(res, 200, new
+                var snap = _agents.GetLatestSnapshot();
+                await WriteJsonAsync(response, 200, new
                 {
                     utc = snap.Utc,
                     worldReady = snap.WorldReady,
@@ -211,32 +230,32 @@ public sealed class AgentApiServer : IDisposable
                 var id = path.Substring("/agents/".Length);
                 if (string.IsNullOrWhiteSpace(id))
                 {
-                    await WriteJsonAsync(res, 400, new { error = "missing_id" });
+                    await WriteJsonAsync(response, 400, new { error = "missing_id" });
                     return;
                 }
 
-                var agent = _ai.TryGetAgentSnapshot(id);
+                var agent = _agents.TryGetAgentSnapshot(id);
                 if (agent is null)
                 {
-                    await WriteJsonAsync(res, 404, new { error = "not_found", id });
+                    await WriteJsonAsync(response, 404, new { error = "not_found", id });
                     return;
                 }
 
-                await WriteJsonAsync(res, 200, agent);
+                await WriteJsonAsync(response, 200, agent);
                 return;
             }
 
-            await WriteJsonAsync(res, 404, new { error = "not_found" });
+            await WriteJsonAsync(response, 404, new { error = "not_found" });
         }
         catch (Exception ex)
         {
-            try { await WriteJsonAsync(res, 500, new { error = "server_error", message = ex.Message }); }
+            try { await WriteJsonAsync(response, 500, new { error = "server_error", message = ex.Message }); }
             catch { }
         }
         finally
         {
-            try { res.OutputStream.Close(); } catch { }
-            try { res.Close(); } catch { }
+            try { response.OutputStream.Close(); } catch { }
+            try { response.Close(); } catch { }
         }
     }
 
@@ -265,7 +284,7 @@ public sealed class AgentApiServer : IDisposable
     {
         response.StatusCode = status;
         response.ContentType = "application/json; charset=utf-8";
-        await JsonSerializer.SerializeAsync(response.OutputStream, payload, payload.GetType(), JsonOptions)
+        await JsonSerializer.SerializeAsync(response.OutputStream, payload, payload.GetType(), _jsonOptions)
             .ConfigureAwait(false);
     }
 }

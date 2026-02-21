@@ -12,12 +12,12 @@ namespace GarettMValley.Agent.Mind;
 public sealed class PersonalityFileGen
 {
     private readonly IModHelper _helper;
-    private readonly IMonitor _log;
+    private readonly IMonitor _monitor;
 
-    public PersonalityFileGen(IModHelper helper, IMonitor log)
+    public PersonalityFileGen(IModHelper helper, IMonitor monitor)
     {
         _helper = helper;
-        _log = log;
+        _monitor = monitor;
     }
 
     public void GenerateFile(string outPath = "assets/personalities.gen.json", bool force = false)
@@ -51,7 +51,7 @@ public sealed class PersonalityFileGen
             characters = _helper.GameContent.Load<Dictionary<string, CharacterData>>("Data/Characters");
         } catch (Exception exception)
         {
-            _log.Log($"Failed to load Data/Characters: {exception}", LogLevel.Error);
+            _monitor.Log($"Failed to load Data/Characters: {exception}", LogLevel.Error);
             return;
         }
         
@@ -89,6 +89,6 @@ public sealed class PersonalityFileGen
         }
 
         _helper.Data.WriteJsonFile(outPath, result);
-        _log.Log($"Wrote: {result.Count} personality profiles to {outPath}", LogLevel.Info);
+        _monitor.Log($"Wrote: {result.Count} personality profiles to {outPath}", LogLevel.Info);
     }
 }

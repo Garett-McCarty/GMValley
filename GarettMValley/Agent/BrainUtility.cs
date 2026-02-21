@@ -1,3 +1,5 @@
+using GarettMValley.Agent.Mind;
+
 namespace GarettMValley.Agent;
 
 public sealed class BrainUtility
@@ -14,13 +16,13 @@ public sealed class BrainUtility
         new Actions.SpeakAction(),
     };
 
-    public IAction ChooseAction(Blackboard blackboard)
+    public IAction ChooseAction(MindState mindstate)
     {
         IAction bestAction = _actions[0];
         float bestScore = float.NegativeInfinity;
         foreach (var action in _actions)
         {
-            var score = action.Score(blackboard);
+            var score = action.Score(mindstate);
             if (score > bestScore)
             {
                 bestAction = action;

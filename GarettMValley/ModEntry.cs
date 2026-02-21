@@ -19,16 +19,19 @@ namespace GarettMValley;
 public sealed class ModEntry : Mod
 {
     /// <summary>
-    /// Instance to our modss configuration
+    /// MOD Configuration
     /// </summary>
-    internal ModConfig Config { get; private set; } = new();
+    internal ModConfig _config { get; private set; } = new();
 
     /// <summary>
-    /// Instance to our AI Manager
+    /// Agent Manager
     /// </summary>
-    private AiManager AiManager = null!;
+    private AgentManager _agentManager = null!;
 
-    private AgentApiServer ApiServer = null!;
+    /// <summary>
+    /// Debug Web Server
+    /// </summary>
+    private DebugServer _apiServer = null!;
 
     private DialogueSystem DialogueManager = null!;
 
@@ -43,8 +46,8 @@ public sealed class ModEntry : Mod
     {
         try
         {
-            Config = helper.ReadConfig<ModConfig>();
-            if (!Config.EnableMod)
+            _config = helper.ReadConfig<ModConfig>();
+            if (!_config.EnableMod)
             {
                 Monitor.Log("GarettMValley is disabled in MOD Configuration, Bailing out!");
                 return;
@@ -52,24 +55,24 @@ public sealed class ModEntry : Mod
 
             Monitor.Log("GarettMValley loading…", LogLevel.Info);
             
-            AiManager = new AiManager(Monitor, Config);
-            AiManager.Hook(helper);
+            _agentManager = new AgentManager(Monitor, _config);
+            _agentManager.Hook(helper);
             
             DialogueManager = new DialogueSystem(Monitor);
-            DialogueManager.Hook(helper, AiManager, this.ModManifest.UniqueID);
+            DialogueManager.Hook(helper, _agentManager, this.ModManifest.UniqueID);
 
-            ApiServer = new AgentApiServer(Monitor, AiManager, Config);
-            ApiServer.Start();
+            _apiServer = new DebugServer(Monitor, _agentManager, _config);
+            _apiServer.Start();
 
-            UiManager = new UiManager(Monitor, Helper, () => this.Config, (cfg) => this.Config = cfg, (cfg) =>
+            UiManager = new UiManager(Monitor, Helper, () => this._config, (cfg) => this._config = cfg, (cfg) =>
             {
                 // TODO: Propagate to different subsystems that our configuration has been updated.
             });
             UiManager.Initialize();
 
-            helper.Events.GameLoop.ReturnedToTitle += (_, _) => ApiServer?.Stop();
-            helper.Events.GameLoop.GameLaunched += (_, _) => ApiServer?.Start();
-            helper.Events.GameLoop.SaveLoaded += (_, _) => ApiServer?.Start();
+            helper.Events.GameLoop.ReturnedToTitle += (_, _) => _apiServer?.Stop();
+            helper.Events.GameLoop.GameLaunched += (_, _) => _apiServer?.Start();
+            helper.Events.GameLoop.SaveLoaded += (_, _) => _apiServer?.Start();
             
             Monitor.Log("GarettMValley loaded successfully with AI dialogue support!", LogLevel.Info);
         }

@@ -6,16 +6,16 @@ namespace GarettMValley.Agent.Mind;
 
 public static class VisualAppraisal
 {
-    public static (float appraisal, float threat, float novelty) Appraise(Blackboard blackboard, object target, string targetKind, string targetId)
+    public static (float appraisal, float threat, float novelty) Appraise(MindState mindstate, object target, string targetKind, string targetId)
     {
         float appraisal = 0.0f;
         float threat = 0.0f;
         float novelty = 0.0f;
 
-        if (targetKind == "player" && blackboard.Player is not null && blackboard.SelfRaw is NPC npc)
+        if (targetKind == "player" && mindstate.Player is not null && mindstate.SelfRaw is NPC npc)
         {
             float heartsFactor = 0.5f;
-            if (blackboard.Player.friendshipData.TryGetValue(npc.Name, out var friendship))
+            if (mindstate.Player.friendshipData.TryGetValue(npc.Name, out var friendship))
             {
                 float hearts = friendship.Points / 250.0f;
                 heartsFactor = MathHelper.Clamp(hearts / 10.0f, 0.0f, 1.0f);
@@ -23,9 +23,9 @@ public static class VisualAppraisal
 
             appraisal = MathHelper.Clamp(-0.2f + 1.2f * heartsFactor, -1.0f, 1.0f);
 
-            if (blackboard.VisuallyPerceived.TryGetValue("player", out var player))
+            if (mindstate.VisuallyPerceived.TryGetValue("player", out var player))
             {
-                novelty = MathHelper.Clamp((player.LastSeenTick == 0 ? 1.0f : (blackboard.Tick - player.LastSeenTick) / 40.0f), 0.0f, 1.0f);
+                novelty = MathHelper.Clamp((player.LastSeenTick == 0 ? 1.0f : (mindstate.Tick - player.LastSeenTick) / 40.0f), 0.0f, 1.0f);
             }
         }
 

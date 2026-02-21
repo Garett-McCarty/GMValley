@@ -1,5 +1,6 @@
 using StardewValley.Monsters;
 using Microsoft.Xna.Framework;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Mind.Emotion;
 
 namespace GarettMValley.Agent.Sensors;
@@ -10,16 +11,16 @@ public sealed class NearbyThreatSensor : ISensor
     private const float ThreatRadiusTilesSq = ThreatRadiusTiles * ThreatRadiusTiles;
     private const int ThreatEmotionCooldown = 4; // ~1 second (AI ticks 4/sec)
 
-    public void Sense(Blackboard blackboard)
+    public void Sense(MindState mindstate)
     {
         Monster? nearest = null;
         float bestDistSq = float.MaxValue;
 
-        foreach(var character in blackboard.Location!.characters)
+        foreach(var character in mindstate.Location!.characters)
         {
             if (character is not Monster monster)
                 continue;
-            float distanceSq = Vector2.DistanceSquared(monster.Tile, blackboard.Self!.Tile);
+            float distanceSq = Vector2.DistanceSquared(monster.Tile, mindstate.Self!.Tile);
             if (distanceSq <= ThreatRadiusTilesSq && distanceSq < bestDistSq)
             {
                 bestDistSq = distanceSq;
@@ -30,10 +31,10 @@ public sealed class NearbyThreatSensor : ISensor
         if (nearest is null)
             return;
         
-        blackboard.ThreatNearby = true;
-        blackboard.ThreatTile = nearest.Tile;
+        mindstate.ThreatNearby = true;
+        mindstate.ThreatTile = nearest.Tile;
 
-        if (blackboard.TryPulseCooldown("emotion:threat", ThreatEmotionCooldown))
+        if (mindstate.TryPulseCooldown("emotion:threat", ThreatEmotionCooldown))
         {
             EmotionDelta delta = new EmotionDelta
             {
@@ -50,7 +51,7 @@ public sealed class NearbyThreatSensor : ISensor
             delta.Stress *= (0.5f + 0.5f * n);
             delta.Arousal *= (0.5f + 0.5f * n);
 
-            blackboard.ApplyDelta(blackboard.Personality.ApplyPersonalityTo(delta));
+            mindstate.ApplyDelta(mindstate.Personality.ApplyPersonalityTo(delta));
         }
     }
 }

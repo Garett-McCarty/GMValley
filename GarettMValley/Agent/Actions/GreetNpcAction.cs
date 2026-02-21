@@ -1,10 +1,4 @@
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-using StardewValley;
-using StardewValley.Monsters;
-using GarettMValley;
-using GarettMValley.Agent;
-using System.Security.Cryptography.X509Certificates;
+using GarettMValley.Agent.Mind;
 using GarettMValley.Agent.Emote;
 using GarettMValley.Agent.Utility;
 using Microsoft.Xna.Framework;
@@ -15,40 +9,40 @@ public sealed class GreetNpcAction : IAction
 {
     public string IntentKey => "greet_npc";
     public bool IsFinished { get; private set; } = false;
-    public float Score(Blackboard blackboard)
+    public float Score(MindState mindstate)
     {
-        var distance = blackboard.DistanceToNearestFriendly;
+        var distance = mindstate.DistanceToNearestFriendly;
         if (float.IsNegativeInfinity(distance) || float.IsNaN(distance))
             return 0.0f;
 
-        if (blackboard.IsOnCooldown(IntentKey)) return 0.0f;
-        if (blackboard.NearestFriendlyId is null) return 0.0f;
+        if (mindstate.IsOnCooldown(IntentKey)) return 0.0f;
+        if (mindstate.NearestFriendlyId is null) return 0.0f;
         if (distance > 3.0) return 0.0f;
 
-        float threat = 1.0f - PersonalityWeights.Threat(blackboard);
+        float threat = 1.0f - PersonalityWeights.Threat(mindstate);
         if (threat <= 0.0f) return 0.0f;
 
         float nearNpc = 1.0f - MathHelper.Clamp((distance - 2.0f) / (7.0f - 2.0f), 0.0f, 1.0f);
-        float calm = PersonalityWeights.CalmGate(blackboard);
-        float mood = PersonalityWeights.PositiveMood(blackboard);
+        float calm = PersonalityWeights.CalmGate(mindstate);
+        float mood = PersonalityWeights.PositiveMood(mindstate);
         float baseDesire =
             (0.55f * nearNpc) +
-            (0.25f * blackboard.Emotion.SocialNeed) +
+            (0.25f * mindstate.Emotion.SocialNeed) +
             (0.20f * mood);
-        float crowd = 1.0f - (0.25f * PersonalityWeights.Crowd(blackboard));
+        float crowd = 1.0f - (0.25f * PersonalityWeights.Crowd(mindstate));
         float score = baseDesire * calm * threat * crowd;
 
         return MathHelper.Clamp(score, 0.0f, 1.0f);
     }
-    public bool CanContinue(Blackboard blackboard) => blackboard.NearestFriendlyId is not null && blackboard.DistanceToNearestFriendly <= 4.0f;
-    public void Start(Blackboard blackboard) { IsFinished = false; blackboard.StartIntent(IntentKey, 30); }
-    public void Tick(Blackboard blackboard)
+    public bool CanContinue(MindState mindstate) => mindstate.NearestFriendlyId is not null && mindstate.DistanceToNearestFriendly <= 4.0f;
+    public void Start(MindState mindstate) { IsFinished = false; mindstate.StartIntent(IntentKey, 30); }
+    public void Tick(MindState mindstate)
     {
-        int emote = EmotePicker.Pick(blackboard.Emotion, blackboard.ThreatNearby, EmoteContext.Greeting);
-        blackboard.Self!.FaceTile(blackboard.NearestFriendlyTile);
-        blackboard.Self.Emote(emote);
-        blackboard.SetCooldown(IntentKey, 900);
+        int emote = EmotePicker.Pick(mindstate.Emotion, mindstate.ThreatNearby, EmoteContext.Greeting);
+        mindstate.Self!.FaceTile(mindstate.NearestFriendlyTile);
+        mindstate.Self.Emote(emote);
+        mindstate.SetCooldown(IntentKey, 900);
         IsFinished = true;
     }
-    public void Abort(Blackboard blackboard) { IsFinished = true; blackboard.ClearIntent(); }
+    public void Abort(MindState mindstate) { IsFinished = true; mindstate.ClearIntent(); }
 }
