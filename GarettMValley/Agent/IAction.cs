@@ -1,4 +1,4 @@
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 
 namespace GarettMValley.Agent;
 

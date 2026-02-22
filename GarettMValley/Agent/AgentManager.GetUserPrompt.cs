@@ -1,6 +1,6 @@
 using System.Text;
 using StardewValley;
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Dialogue;
 
 namespace GarettMValley.Agent;

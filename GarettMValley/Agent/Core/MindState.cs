@@ -7,7 +7,7 @@ using GarettMValley.Agent.Stimuli;
 using Microsoft.Xna.Framework;
 using StardewValley;
 
-namespace GarettMValley.Agent.Mind;
+namespace GarettMValley.Agent.Core;
 
 /// <summary>
 /// Stores all the necessary state variables of an Agent.

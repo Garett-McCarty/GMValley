@@ -1,5 +1,5 @@
 
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Utility;
 using Microsoft.Xna.Framework;
 

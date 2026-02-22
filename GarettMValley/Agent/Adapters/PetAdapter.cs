@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Characters;
 
-using GarettMValley.Agent;
+using GarettMValley.Agent.Core;
 
 namespace GarettMValley.Agent.Adapters;
 

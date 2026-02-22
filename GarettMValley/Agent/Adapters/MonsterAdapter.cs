@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Monsters;
+using GarettMValley.Agent.Core;
 
 namespace GarettMValley.Agent.Adapters;
 

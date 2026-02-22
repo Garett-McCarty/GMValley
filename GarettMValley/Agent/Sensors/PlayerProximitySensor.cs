@@ -1,4 +1,4 @@
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Mind.Emotion;
 using Microsoft.Xna.Framework;
 

@@ -1,6 +1,6 @@
 using StardewValley.Monsters;
 using Microsoft.Xna.Framework;
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Mind.Emotion;
 
 namespace GarettMValley.Agent.Sensors;

@@ -5,7 +5,7 @@ using StardewValley.Monsters;
 using GarettMValley;
 using GarettMValley.Agent;
 using Microsoft.Xna.Framework;
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Pathing;
 
 namespace GarettMValley.Agent.Actions;

@@ -1,5 +1,5 @@
 
-namespace GarettMValley.Agent;
+namespace GarettMValley.Agent.Core;
 
 /// <summary>
 /// Agent Identifier

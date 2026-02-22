@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using GarettMValley.Agent.Core;
 
 namespace GarettMValley.Agent.Adapters;
 

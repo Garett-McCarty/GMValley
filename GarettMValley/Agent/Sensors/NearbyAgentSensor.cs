@@ -2,7 +2,7 @@
 using StardewValley;
 using Microsoft.Xna.Framework;
 using StardewValley.Characters;
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Mind.Emotion;
 
 namespace GarettMValley.Agent.Sensors;

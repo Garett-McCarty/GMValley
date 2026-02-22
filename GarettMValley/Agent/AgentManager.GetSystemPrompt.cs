@@ -1,5 +1,5 @@
 using System.Text;
-using GarettMValley.Agent.Mind;
+using GarettMValley.Agent.Core;
 using GarettMValley.Agent.Mind.Emotion;
 using GarettMValley.Agent.Mind.Personality;
 using StardewValley;
