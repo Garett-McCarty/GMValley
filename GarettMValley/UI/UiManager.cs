@@ -1,4 +1,5 @@
 using System;
+using GarettMValley.Cheats;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -7,13 +8,40 @@ namespace GarettMValley.UI;
 
 internal sealed class UiManager
 {
+    /// <summary>
+    /// Reference to our logging system
+    /// </summary>
     private readonly IMonitor _monitor;
+
+    /// <summary>
+    /// Reference to our SMAPI Mod Helper
+    /// </summary>
     private readonly IModHelper _helper;
 
+    /// <summary>
+    /// Handler for when mod configuration is read.
+    /// </summary>
     private readonly Func<ModConfig> _getConfig;
+
+    /// <summary>
+    /// Handler for when mod configuration is saved.
+    /// </summary>
     private readonly Action<ModConfig> _setConfig;
 
+    /// <summary>
+    /// Handler for when mod configuration is applied.
+    /// </summary>
     private readonly Action<ModConfig> _onConfigApplied;
+
+    /// <summary>
+    /// Reference to our cheat manager
+    /// </summary>
+    private readonly CheatManager? _cheats;
+
+    /// <summary>
+    /// Handler for when a cheat context is read.
+    /// </summary>
+    private readonly Func<CheatContext>? _getCheatContext;
 
     public bool UseCustomConfigMenu { get; private set; } = true;
 
@@ -22,7 +50,9 @@ internal sealed class UiManager
         IModHelper helper,
         Func<ModConfig> getConfig,
         Action<ModConfig> setConfig,
-        Action<ModConfig> onConfigApplied
+        Action<ModConfig> onConfigApplied,
+        CheatManager? cheats,
+        Func<CheatContext> getCheatContext
     )
     {
         _monitor = monitor;
@@ -30,6 +60,8 @@ internal sealed class UiManager
         _getConfig = getConfig;
         _setConfig = setConfig;
         _onConfigApplied = onConfigApplied;
+        _cheats = cheats;
+        _getCheatContext = getCheatContext;
     }
 
     public void Initialize()
